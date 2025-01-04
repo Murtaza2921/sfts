@@ -39,6 +39,7 @@ export default function PhoneNumberVerificationScreen() {
               ...driver,
               token: res.data.token,
             };
+            console.log("here is token : ", driverData.token)
             setLoader(false);
             router.push({
               pathname: "/(routes)/email-verification",
@@ -71,6 +72,7 @@ export default function PhoneNumberVerificationScreen() {
             });
           });
       }
+      
     }
   };
   return (

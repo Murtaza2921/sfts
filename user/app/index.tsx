@@ -1,3 +1,4 @@
+import 'react-native-get-random-values';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";

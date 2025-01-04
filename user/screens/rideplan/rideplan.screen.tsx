@@ -10,6 +10,8 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
+import React from 'react';
+
 import styles from "./styles";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { external } from "@/styles/external.style";
@@ -121,7 +123,7 @@ export default function RidePlanScreen() {
   }, []);
 
   const initializeWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.1.2:8080");
+    ws.current = new WebSocket("ws://192.168.10.14:8080");
     ws.current.onopen = () => {
       console.log("Connected to websocket server");
       setWsConnected(true);
@@ -161,6 +163,7 @@ export default function RidePlanScreen() {
       let finalStatus = existingStatus;
       if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
+        console.log("permissions : ", status)
         finalStatus = status;
       }
       if (finalStatus !== "granted") {
@@ -279,6 +282,7 @@ export default function RidePlanScreen() {
 
   const handlePlaceSelect = async (placeId: any) => {
     try {
+      console.log("place : ", placeId)
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/place/details/json`,
         {
@@ -288,6 +292,7 @@ export default function RidePlanScreen() {
           },
         }
       );
+      console.log("here is the axios error.", response)
       const { lat, lng } = response.data.result.geometry.location;
 
       const selectedDestination = { latitude: lat, longitude: lng };
@@ -343,6 +348,7 @@ export default function RidePlanScreen() {
   }, [marker, currentLocation]);
 
   const getNearbyDrivers = () => {
+    console.log("step 3");
     ws.current.onmessage = async (e: any) => {
       try {
         const message = JSON.parse(e.data);
@@ -353,9 +359,11 @@ export default function RidePlanScreen() {
         console.log(error, "Error parsing websocket");
       }
     };
+    console.log("step 4");
   };
 
   const getDriversData = async (drivers: any) => {
+    console.log("step 5");
     // Extract driver IDs from the drivers array
     const driverIds = drivers.map((driver: any) => driver.id).join(",");
     const response = await axios.get(
@@ -364,14 +372,15 @@ export default function RidePlanScreen() {
         params: { ids: driverIds },
       }
     );
-
+    console.log("step 6");
     const driverData = response.data;
     setdriverLists(driverData);
     setdriverLoader(false);
+    console.log("step 7");
   };
 
   const requestNearbyDrivers = () => {
-    console.log(wsConnected);
+    console.log("requestNearbyDrivers : ",wsConnected);
     if (currentLocation && wsConnected) {
       ws.current.send(
         JSON.stringify({
@@ -381,11 +390,15 @@ export default function RidePlanScreen() {
           longitude: currentLocation.longitude,
         })
       );
+      console.log("step 2");
       getNearbyDrivers();
     }
   };
 
   const sendPushNotification = async (expoPushToken: string, data: any) => {
+    console.log("Sending push notification...");
+  
+    // Message structure
     const message = {
       to: expoPushToken,
       sound: "default",
@@ -393,18 +406,28 @@ export default function RidePlanScreen() {
       body: "You have a new ride request.",
       data: { orderData: data },
     };
-
-    await axios.post("https://exp.host/--/api/v2/push/send", message);
+  
+    console.log("Message prepared:", message);
+  
+    try {
+      // Sending push notification via axios
+      const response = await axios.post("https://exp.host/--/api/v2/push/send", message);
+      console.log("Push notification sent successfully:", response.data);
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+    }
   };
+  
 
   const handleOrder = async () => {
+    console.log("step 8");
     const currentLocationName = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLocation?.latitude},${currentLocation?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
     );
     const destinationLocationName = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker?.latitude},${marker?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
     );
-
+    console.log("step 9");
     const data = {
       user,
       currentLocation,
@@ -415,8 +438,9 @@ export default function RidePlanScreen() {
       destinationLocation:
         destinationLocationName.data.results[0].formatted_address,
     };
-    const driverPushToken = "ExponentPushToken[v1e34ML-hnypD7MKQDDwaK]";
-
+    console.log("step 10 : ", data);
+    const driverPushToken = "ExponentPushToken[47XbPbGpyW6XRt_2A_rqQd]";
+    console.log("step 11");
     await sendPushNotification(driverPushToken, JSON.stringify(data));
   };
 

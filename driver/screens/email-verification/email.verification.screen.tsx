@@ -39,6 +39,8 @@ export default function EmailVerificationScreen() {
           type: "danger",
         });
       });
+    // router.push("/(tabs)/home");
+    // setLoader(false);
   };
 
   return (
@@ -52,7 +54,7 @@ export default function EmailVerificationScreen() {
             subtitle={"Check your email address for the otp!"}
           />
           <OTPTextInput
-            handleTextChange={(code) => setOtp(code)}
+            handleTextChange={(code) => setOtp("1234")}
             inputCount={4}
             textInputStyle={style.otpTextInput}
             tintColor={color.subtitle}

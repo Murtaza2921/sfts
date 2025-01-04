@@ -12,6 +12,38 @@ const client = twilio(accountSid, authToken, {
 });
 
 // register new user
+// export const registerUser = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { phone_number } = req.body;
+//     try {
+//       await client.verify.v2
+//         ?.services(process.env.TWILIO_SERVICE_SID!)
+//         .verifications.create({
+//           channel: "sms",
+//           to: phone_number,
+//         });
+
+//       res.status(201).json({
+//         success: true,
+//       });
+//     } catch (error) {
+//       console.log(error);
+//       res.status(400).json({
+//         success: false,
+//       });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({
+//       success: false,
+//     });
+//   }
+// };
+
 export const registerUser = async (
   req: Request,
   res: Response,
@@ -19,6 +51,20 @@ export const registerUser = async (
 ) => {
   try {
     const { phone_number } = req.body;
+
+    // Bypass Twilio for testing
+    console.log(process.env.NODE_ENV)
+    console.log(process.env.BYPASS_TWILIO)
+    if (process.env.NODE_ENV === "development" || process.env.BYPASS_TWILIO === "true") {
+      console.log(`Simulated SMS sent to ${phone_number} (Twilio bypassed)`);
+
+      return res.status(201).json({
+        success: true,
+        message: "Twilio bypassed. Verification simulated.",
+      });
+    }
+
+    // Actual Twilio logic
     try {
       await client.verify.v2
         ?.services(process.env.TWILIO_SERVICE_SID!)
@@ -29,20 +75,25 @@ export const registerUser = async (
 
       res.status(201).json({
         success: true,
+        message: "Verification initiated via Twilio.",
       });
     } catch (error) {
-      console.log(error);
+      console.error("Twilio verification error:", error);
       res.status(400).json({
         success: false,
+        message: "Failed to send verification via Twilio.",
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Register user error:", error);
     res.status(400).json({
       success: false,
+      message: "Unexpected error during user registration.",
     });
   }
 };
+
+
 
 // verify otp
 export const verifyOtp = async (
@@ -53,6 +104,38 @@ export const verifyOtp = async (
   try {
     const { phone_number, otp } = req.body;
 
+    // Bypass Twilio in development or when BYPASS_TWILIO is true
+    if (process.env.NODE_ENV === "development" || process.env.BYPASS_TWILIO === "true") {
+      console.log(`Simulating OTP verification for phone number: ${phone_number} with OTP: ${otp}`);
+      
+      // Simulate OTP verification success
+      // isUserExist logic follows regardless of bypassing Twilio
+      const isUserExist = await prisma.user.findUnique({
+        where: {
+          phone_number,
+        },
+      });
+
+      if (isUserExist) {
+        await sendToken(isUserExist, res);
+      } else {
+        // Create account for new user
+        const user = await prisma.user.create({
+          data: {
+            phone_number: phone_number,
+          },
+        });
+        res.status(200).json({
+          success: true,
+          message: "OTP verified successfully (simulated)!",
+          user: user,
+        });
+      }
+      
+      return;  // End early if bypassing Twilio
+    }
+
+    // Twilio OTP verification logic for production
     try {
       await client.verify.v2
         .services(process.env.TWILIO_SERVICE_SID!)
@@ -60,16 +143,18 @@ export const verifyOtp = async (
           to: phone_number,
           code: otp,
         });
-      // is user exist
+
+      // Check if user exists
       const isUserExist = await prisma.user.findUnique({
         where: {
           phone_number,
         },
       });
+
       if (isUserExist) {
         await sendToken(isUserExist, res);
       } else {
-        // create account
+        // Create a new user if none exists
         const user = await prisma.user.create({
           data: {
             phone_number: phone_number,
@@ -96,7 +181,62 @@ export const verifyOtp = async (
   }
 };
 
+
 // sending otp to email
+// export const sendingOtpToEmail = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { email, name, userId } = req.body;
+
+//     const otp = Math.floor(1000 + Math.random() * 9000).toString();
+//     const user = {
+//       userId,
+//       name,
+//       email,
+//     };
+//     const token = jwt.sign(
+//       {
+//         user,
+//         otp,
+//       },
+//       process.env.EMAIL_ACTIVATION_SECRET!,
+//       {
+//         expiresIn: "5m",
+//       }
+//     );
+//     try {
+//       await nylas.messages.send({
+//         identifier: process.env.USER_GRANT_ID!,
+//         requestBody: {
+//           to: [{ name: name, email: email }],
+//           subject: "Verify your email address!",
+//           body: `
+//           <p>Hi ${name},</p>
+//       <p>Your Ridewave verification code is ${otp}. If you didn't request for this OTP, please ignore this email!</p>
+//       <p>Thanks,<br>Ridewave Team</p>
+//           `,
+//         },
+//       });
+//       res.status(201).json({
+//         success: true,
+//         token,
+//       });
+//     } catch (error: any) {
+//       res.status(400).json({
+//         success: false,
+//         message: error.message,
+//       });
+//       console.log(error);
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+
 export const sendingOtpToEmail = async (
   req: Request,
   res: Response,
@@ -105,7 +245,8 @@ export const sendingOtpToEmail = async (
   try {
     const { email, name, userId } = req.body;
 
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    //const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const otp = "1234";
     const user = {
       userId,
       name,
@@ -121,6 +262,18 @@ export const sendingOtpToEmail = async (
         expiresIn: "5m",
       }
     );
+
+    // Bypass Nylas API for development or testing
+    if (process.env.NODE_ENV === "development" || process.env.BYPASS_NYLAS === "true") {
+      console.log(`Simulated email sent to ${name} at ${email} with OTP: ${otp}`);
+      return res.status(201).json({
+        success: true,
+        token,
+        message: "Simulated email sent (Nylas bypassed)",
+      });
+    }
+
+    // Actual Nylas email sending logic
     try {
       await nylas.messages.send({
         identifier: process.env.USER_GRANT_ID!,
@@ -128,9 +281,9 @@ export const sendingOtpToEmail = async (
           to: [{ name: name, email: email }],
           subject: "Verify your email address!",
           body: `
-          <p>Hi ${name},</p>
-      <p>Your Ridewave verification code is ${otp}. If you didn't request for this OTP, please ignore this email!</p>
-      <p>Thanks,<br>Ridewave Team</p>
+            <p>Hi ${name},</p>
+            <p>Your Ridewave verification code is ${otp}. If you didn't request for this OTP, please ignore this email!</p>
+            <p>Thanks,<br>Ridewave Team</p>
           `,
         },
       });
@@ -147,8 +300,14 @@ export const sendingOtpToEmail = async (
     }
   } catch (error) {
     console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error occurred while sending OTP.",
+    });
   }
 };
+
+
 
 // verifying email otp
 export const verifyingEmail = async (

@@ -28,6 +28,7 @@ wss.on("connection", (ws) => {
       if (data.type === "requestRide" && data.role === "user") {
         console.log("Requesting ride...");
         const nearbyDrivers = findNearbyDrivers(data.latitude, data.longitude);
+        console.log("near by Drivers : ",nearbyDrivers);
         ws.send(
           JSON.stringify({ type: "nearbyDrivers", drivers: nearbyDrivers })
         );

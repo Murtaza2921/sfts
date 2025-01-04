@@ -20,27 +20,35 @@ export const sendingOtpToPhone = async (
   try {
     const { phone_number } = req.body;
     console.log(phone_number);
-    try {
-      await client.verify.v2
-        ?.services(process.env.TWILIO_SERVICE_SID!)
-        .verifications.create({
-          channel: "sms",
-          to: phone_number,
-        });
 
-      res.status(201).json({
-        success: true,
-      });
+    // Mocking the Twilio API call
+    try {
+      // Simulating a successful Twilio response
+      // You can mock a failure by changing the condition later if needed
+      const mockTwilioResponse = { success: true };
+
+      if (mockTwilioResponse.success) {
+        // Simulate successful response from Twilio API
+        res.status(201).json({
+          success: true,
+          message: 'OTP sent successfully (mocked)',
+        });
+      } else {
+        // Simulate an error response from Twilio
+        throw new Error('Twilio API call failed');
+      }
     } catch (error) {
       console.log(error);
       res.status(400).json({
         success: false,
+        message: 'Failed to send OTP (mocked)',
       });
     }
   } catch (error) {
     console.log(error);
     res.status(400).json({
       success: false,
+      message: 'Unexpected error occurred',
     });
   }
 };
@@ -52,15 +60,14 @@ export const verifyPhoneOtpForLogin = async (
   next: NextFunction
 ) => {
   try {
-    const { phone_number, otp } = req.body;
-
+    const { phone_number = "+88003135942921", otp } = req.body;
     try {
-      await client.verify.v2
-        .services(process.env.TWILIO_SERVICE_SID!)
-        .verificationChecks.create({
-          to: phone_number,
-          code: otp,
-        });
+      // await client.verify.v2
+      //   .services(process.env.TWILIO_SERVICE_SID!)
+      //   .verificationChecks.create({
+      //     to: "+88003135942921",
+      //     code: otp,
+      //   });
 
       const driver = await prisma.driver.findUnique({
         where: {
@@ -84,40 +91,120 @@ export const verifyPhoneOtpForLogin = async (
 };
 
 // verifying phone otp for registration
-export const verifyPhoneOtpForRegistration = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { phone_number, otp } = req.body;
+// export const verifyPhoneOtpForRegistration = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { phone_number, otp } = req.body;
 
-    try {
-      await client.verify.v2
-        .services(process.env.TWILIO_SERVICE_SID!)
-        .verificationChecks.create({
-          to: phone_number,
-          code: otp,
-        });
+//     try {
+//       await client.verify.v2
+//         .services(process.env.TWILIO_SERVICE_SID!)
+//         .verificationChecks.create({
+//           to: phone_number,
+//           code: otp,
+//         });
 
-      await sendingOtpToEmail(req, res);
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: "Something went wrong!",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      success: false,
-    });
-  }
-};
+//       await sendingOtpToEmail(req, res);
+//     } catch (error) {
+//       console.log(error);
+//       res.status(400).json({
+//         success: false,
+//         message: "Something went wrong!",
+//       });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({
+//       success: false,
+//     });
+//   }
+// };
 
 // sending otp to email
-export const sendingOtpToEmail = async (req: Request, res: Response) => {
+
+
+
+
+
+// export const sendingOtpToEmail = async (req: Request, res: Response) => {
+//   try {
+//     const {
+//       name,
+//       country,
+//       phone_number,
+//       email,
+//       vehicle_type,
+//       registration_number,
+//       registration_date,
+//       driving_license,
+//       vehicle_color,
+//       rate,
+//     } = req.body;
+
+//     const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+//     const driver = {
+//       name,
+//       country,
+//       phone_number,
+//       email,
+//       vehicle_type,
+//       registration_number,
+//       registration_date,
+//       driving_license,
+//       vehicle_color,
+//       rate,
+//     };
+//     const token = jwt.sign(
+//       {
+//         driver,
+//         otp,
+//       },
+//       process.env.EMAIL_ACTIVATION_SECRET!,
+//       {
+//         expiresIn: "5m",
+//       }
+//     );
+//     try {
+//       await nylas.messages.send({
+//         identifier: process.env.USER_GRANT_ID!,
+//         requestBody: {
+//           to: [{ name: name, email: email }],
+//           subject: "Verify your email address!",
+//           body: `
+//             <p>Hi ${name},</p>
+//         <p>Your Ridewave verification code is ${otp}. If you didn't request for this OTP, please ignore this email!</p>
+//         <p>Thanks,<br>Ridewave Team</p>
+//             `,
+//         },
+//       });
+//       res.status(201).json({
+//         success: true,
+//         token,
+//       });
+//     } catch (error: any) {
+//       res.status(400).json({
+//         success: false,
+//         message: error.message,
+//       });
+//       console.log(error);
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+// verifying email otp and creating driver account
+
+
+
+
+
+
+export const sendingOtpToEmail = async (req: Request) => {
   try {
     const {
       name,
@@ -132,8 +219,7 @@ export const sendingOtpToEmail = async (req: Request, res: Response) => {
       rate,
     } = req.body;
 
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
+    const otp = "1234";
     const driver = {
       name,
       country,
@@ -146,6 +232,7 @@ export const sendingOtpToEmail = async (req: Request, res: Response) => {
       vehicle_color,
       rate,
     };
+
     const token = jwt.sign(
       {
         driver,
@@ -156,40 +243,130 @@ export const sendingOtpToEmail = async (req: Request, res: Response) => {
         expiresIn: "5m",
       }
     );
-    try {
-      await nylas.messages.send({
-        identifier: process.env.USER_GRANT_ID!,
-        requestBody: {
-          to: [{ name: name, email: email }],
-          subject: "Verify your email address!",
-          body: `
-            <p>Hi ${name},</p>
-        <p>Your Ridewave verification code is ${otp}. If you didn't request for this OTP, please ignore this email!</p>
-        <p>Thanks,<br>Ridewave Team</p>
-            `,
-        },
-      });
-      res.status(201).json({
-        success: true,
-        token,
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-      console.log(error);
-    }
+
+    // Mocking email sending
+    console.log(`Email not sent. OTP for ${name} is: ${otp}`);
+
+    return {
+      success: true,
+      token,
+    };
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    throw new Error("Failed to send OTP to email");
   }
 };
 
-// verifying email otp and creating driver account
+
+
+export const verifyPhoneOtpForRegistration = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { phone_number, otp } = req.body;
+
+    console.log(
+      `Verifying OTP for phone number: ${phone_number} with OTP: ${otp}`
+    );
+
+    // Mock Twilio OTP verification
+    const mockTwilioResponse = { success: true }; // Simulate a successful response
+
+    if (mockTwilioResponse.success) {
+      console.log("Phone OTP verified successfully (mocked)");
+
+      try {
+        const emailOtpResponse = await sendingOtpToEmail(req);
+        console.log("token : ", emailOtpResponse.token)
+        res.status(200).json({
+          success: true,
+          message: "Phone OTP verified successfully, moving to email OTP process.",
+          emailToken: emailOtpResponse.token,
+        });
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: error,
+        });
+      }
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error during phone OTP verification.",
+    });
+  }
+};
+
+
+// export const verifyingEmailOtp = async (req: Request, res: Response) => {
+//   try {
+//     const { otp, token } = req.body;
+
+//     const newDriver: any = jwt.verify(
+//       token,
+//       process.env.EMAIL_ACTIVATION_SECRET!
+//     );
+
+//     if (newDriver.otp !== otp) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "OTP is not correct or expired!",
+//       });
+//     }
+
+//     const {
+//       name,
+//       country,
+//       phone_number,
+//       email,
+//       vehicle_type,
+//       registration_number,
+//       registration_date,
+//       driving_license,
+//       vehicle_color,
+//       rate,
+//     } = newDriver.driver;
+
+//     const driver = await prisma.driver.create({
+//       data: {
+//         name,
+//         country,
+//         phone_number,
+//         email,
+//         vehicle_type,
+//         registration_number,
+//         registration_date,
+//         driving_license,
+//         vehicle_color,
+//         rate,
+//       },
+//     });
+//     sendToken(driver, res);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({
+//       success: false,
+//       message: "Your otp is expired!",
+//     });
+//   }
+// };
+
+// get logged in driver data
+
 export const verifyingEmailOtp = async (req: Request, res: Response) => {
   try {
     const { otp, token } = req.body;
 
+    // Decode and verify the token
     const newDriver: any = jwt.verify(
       token,
       process.env.EMAIL_ACTIVATION_SECRET!
@@ -215,6 +392,26 @@ export const verifyingEmailOtp = async (req: Request, res: Response) => {
       rate,
     } = newDriver.driver;
 
+    // Check if the email or phone number already exists
+    const existingDriver = await prisma.driver.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone_number },
+        ],
+      },
+    });
+
+    if (existingDriver) {
+      const conflictField =
+        existingDriver.email === email ? "email" : "phone number";
+      return res.status(400).json({
+        success: false,
+        message: `A driver with this ${conflictField} already exists.`,
+      });
+    }
+
+    // Create a new driver if no conflicts
     const driver = await prisma.driver.create({
       data: {
         name,
@@ -229,17 +426,31 @@ export const verifyingEmailOtp = async (req: Request, res: Response) => {
         rate,
       },
     });
+
+    // Send token for the newly created driver
     sendToken(driver, res);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
+  } catch (error: any) {
+    console.error(error);
+
+    if (error.code === "P2002") {
+      // Unique constraint violation occurred
+      const conflictingField = error.meta?.target.replace("driver_", ""); // Prisma provides the field causing the error
+      return res.status(400).json({
+        success: false,
+        message: `A driver with this ${conflictingField} already exists.`,
+      });
+    }
+
+    // Handle other unexpected errors
+    res.status(500).json({
       success: false,
-      message: "Your otp is expired!",
+      message: "An unexpected error occurred. Please try again.",
     });
   }
 };
 
-// get logged in driver data
+
+
 export const getLoggedInDriverData = async (req: any, res: Response) => {
   try {
     const driver = req.driver;

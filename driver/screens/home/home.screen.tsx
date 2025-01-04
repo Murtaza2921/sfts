@@ -52,7 +52,7 @@ export default function HomeScreen() {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [recentRides, setrecentRides] = useState([]);
-  const ws = new WebSocket("ws://192.168.1.2:8080");
+  const ws = new WebSocket("ws://192.168.10.14:8080");
 
   const { colors } = useTheme();
 
@@ -60,54 +60,115 @@ export default function HomeScreen() {
     handleNotification: async () => ({
       shouldShowAlert: true,
       shouldPlaySound: true,
-      shouldSetBadge: false,
+      shouldSetBadge: true,
     }),
   });
 
-  useEffect(() => {
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        // Handle the notification and extract data
-        const orderData = JSON.parse(
-          notification.request.content.data.orderData
-        );
-        setIsModalVisible(true);
-        setCurrentLocation({
-          latitude: orderData.currentLocation.latitude,
-          longitude: orderData.currentLocation.longitude,
-        });
-        setMarker({
-          latitude: orderData.marker.latitude,
-          longitude: orderData.marker.longitude,
-        });
-        setRegion({
-          latitude:
-            (orderData.currentLocation.latitude + orderData.marker.latitude) /
-            2,
-          longitude:
-            (orderData.currentLocation.longitude + orderData.marker.longitude) /
-            2,
-          latitudeDelta:
-            Math.abs(
-              orderData.currentLocation.latitude - orderData.marker.latitude
-            ) * 2,
-          longitudeDelta:
-            Math.abs(
-              orderData.currentLocation.longitude - orderData.marker.longitude
-            ) * 2,
-        });
-        setdistance(orderData.distance);
-        setcurrentLocationName(orderData.currentLocationName);
-        setdestinationLocationName(orderData.destinationLocation);
-        setUserData(orderData.user);
-      });
+  // useEffect(() => {
+  //   notificationListener.current =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       // Handle the notification and extract data
+  //       const orderData = JSON.parse(
+  //         notification.request.content.data.orderData
+  //       );
+  //       setIsModalVisible(true);
+  //       setCurrentLocation({
+  //         latitude: orderData.currentLocation.latitude,
+  //         longitude: orderData.currentLocation.longitude,
+  //       });
+  //       setMarker({
+  //         latitude: orderData.marker.latitude,
+  //         longitude: orderData.marker.longitude,
+  //       });
+  //       setRegion({
+  //         latitude:
+  //           (orderData.currentLocation.latitude + orderData.marker.latitude) /
+  //           2,
+  //         longitude:
+  //           (orderData.currentLocation.longitude + orderData.marker.longitude) /
+  //           2,
+  //         latitudeDelta:
+  //           Math.abs(
+  //             orderData.currentLocation.latitude - orderData.marker.latitude
+  //           ) * 2,
+  //         longitudeDelta:
+  //           Math.abs(
+  //             orderData.currentLocation.longitude - orderData.marker.longitude
+  //           ) * 2,
+  //       });
+  //       setdistance(orderData.distance);
+  //       setcurrentLocationName(orderData.currentLocationName);
+  //       setdestinationLocationName(orderData.destinationLocation);
+  //       setUserData(orderData.user);
+  //     });
 
+  //   return () => {
+  //     Notifications.removeNotificationSubscription(
+  //       notificationListener.current
+  //     );
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    console.log("useEffect triggered");
+  
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received:", notification);
+  
+        try {
+          const orderData = JSON.parse(
+            notification.request.content.data.orderData
+          );
+          console.log("Parsed order data:", orderData);
+  
+          setIsModalVisible(true);
+          setCurrentLocation({
+            latitude: orderData.currentLocation.latitude,
+            longitude: orderData.currentLocation.longitude,
+          });
+          setMarker({
+            latitude: orderData.marker.latitude,
+            longitude: orderData.marker.longitude,
+          });
+          setRegion({
+            latitude:
+              (orderData.currentLocation.latitude + orderData.marker.latitude) /
+              2,
+            longitude:
+              (orderData.currentLocation.longitude +
+                orderData.marker.longitude) /
+              2,
+            latitudeDelta:
+              Math.abs(
+                orderData.currentLocation.latitude - orderData.marker.latitude
+              ) * 2,
+            longitudeDelta:
+              Math.abs(
+                orderData.currentLocation.longitude - orderData.marker.longitude
+              ) * 2,
+          });
+          setdistance(orderData.distance);
+          setcurrentLocationName(orderData.currentLocationName);
+          setdestinationLocationName(orderData.destinationLocation);
+          setUserData(orderData.user);
+  
+          console.log("State updated successfully");
+        } catch (error) {
+          console.error("Error parsing order data:", error);
+        }
+      }
+    );
+  
     return () => {
+      console.log("useEffect cleanup");
       Notifications.removeNotificationSubscription(
         notificationListener.current
       );
     };
   }, []);
+  
+
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -121,6 +182,61 @@ export default function HomeScreen() {
     registerForPushNotificationsAsync();
   }, []);
 
+  // async function registerForPushNotificationsAsync() {
+  //   if (Device.isDevice) {
+  //     const { status: existingStatus } =
+  //       await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== "granted") {
+  //       Toast.show("Failed to get push token for push notification!", {
+  //         type: "danger",
+  //       });
+  //       return;
+  //     }
+  //     const projectId =
+  //       Constants?.expoConfig?.extra?.eas?.projectId ??
+  //       Constants?.easConfig?.projectId;
+  //     if (!projectId) {
+  //       Toast.show("Failed to get project id for push notification!", {
+  //         type: "danger",
+  //       });
+  //     }
+  //     try {
+  //       const pushTokenString = (
+  //         await Notifications.getExpoPushTokenAsync({
+  //           projectId,
+  //         })
+  //       ).data;
+  //       console.log(pushTokenString);
+  //       // return pushTokenString;
+  //     } catch (e: unknown) {
+  //       Toast.show(`${e}`, {
+  //         type: "danger",
+  //       });
+  //     }
+  //   } else {
+  //     Toast.show("Must use physical device for Push Notifications", {
+  //       type: "danger",
+  //     });
+  //   }
+
+  //   if (Platform.OS === "android") {
+  //     Notifications.setNotificationChannelAsync("default", {
+  //       name: "default",
+  //       importance: Notifications.AndroidImportance.MAX,
+  //       vibrationPattern: [0, 250, 250, 250],
+  //       lightColor: "#FF231F7C",
+  //     });
+  //   }
+  // }
+
+  // socket updates
+  
+  
   async function registerForPushNotificationsAsync() {
     if (Device.isDevice) {
       const { status: existingStatus } =
@@ -128,6 +244,7 @@ export default function HomeScreen() {
       let finalStatus = existingStatus;
       if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
+        console.log("permissions : ", status)
         finalStatus = status;
       }
       if (finalStatus !== "granted") {
@@ -150,7 +267,7 @@ export default function HomeScreen() {
             projectId,
           })
         ).data;
-        console.log(pushTokenString);
+        console.log("my push token string : ", pushTokenString);
         // return pushTokenString;
       } catch (e: unknown) {
         Toast.show(`${e}`, {
@@ -172,8 +289,7 @@ export default function HomeScreen() {
       });
     }
   }
-
-  // socket updates
+  
   useEffect(() => {
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
@@ -200,6 +316,7 @@ export default function HomeScreen() {
   }, []);
 
   const haversineDistance = (coords1: any, coords2: any) => {
+     
     const toRad = (x: any) => (x * Math.PI) / 180;
 
     const R = 6371e3; // Radius of the Earth in meters
@@ -217,11 +334,14 @@ export default function HomeScreen() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const distance = R * c; // Distance in meters
+    
     return distance;
+    
   };
 
   const sendLocationUpdate = async (location: any) => {
     const accessToken = await AsyncStorage.getItem("accessToken");
+    console.log("step 17 sendlocationupdate starting")
     await axios
       .get(`${process.env.EXPO_PUBLIC_SERVER_URI}/driver/me`, {
         headers: {
@@ -240,6 +360,7 @@ export default function HomeScreen() {
             ws.send(message);
           }
         }
+        console.log("step 18")
       })
       .catch((error) => {
         console.log(error);
@@ -273,10 +394,28 @@ export default function HomeScreen() {
               await sendLocationUpdate(newLocation);
             }
           }
+
+          // if(lastLocation){
+          //   const distance = haversineDistance(lastLocation, newLocation);
+          //   if(distance > 200) {
+          //     setCurrentLocation(newLocation);
+          //     setLastLocation(newLocation);
+          //     if(driver && wsConnected){
+          //       setLastLocation(newLocation)
+          //     }
+          //   }else{
+          //     setCurrentLocation(newLocation);
+          //     setLastLocation(newLocation);
+          //     if(driver && wsConnected){
+          //       sendLocationUpdate(newLocation)
+          //     }
+          //   }
+          // }
+
         }
       );
     })();
-  }, []);
+  }, [driver]);
 
   const getRecentRides = async () => {
     const accessToken = await AsyncStorage.getItem("accessToken");
@@ -325,6 +464,7 @@ export default function HomeScreen() {
   };
 
   const sendPushNotification = async (expoPushToken: string, data: any) => {
+    console.log("step 19 send push noti starting")
     const message = {
       to: expoPushToken,
       sound: "default",

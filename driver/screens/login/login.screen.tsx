@@ -24,32 +24,34 @@ export default function LoginScreen() {
       });
     } else {
       setloading(true);
-      const phoneNumber = `${countryCode}${phone_number}`;
-      await axios
-        .post(`${process.env.EXPO_PUBLIC_SERVER_URI}/driver/send-otp`, {
-          phone_number: phoneNumber,
-        })
-        .then((res) => {
-          setloading(false);
-          const driver = {
-            phone_number: phoneNumber,
-          };
-          router.push({
-            pathname: "/(routes)/verification-phone-number",
-            params: driver,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          setloading(false);
-          Toast.show(
-            "Something went wrong! please re check your phone number!",
-            {
-              type: "danger",
-              placement: "bottom",
-            }
-          );
-        });
+      // const phoneNumber = `${countryCode}${phone_number}`;
+      // await axios
+      //   .post(`${process.env.EXPO_PUBLIC_SERVER_URI}/driver/send-otp`, {
+      //     phone_number: phoneNumber,
+      //   })
+      //   .then((res) => {
+      //     setloading(false);
+      //     const driver = {
+      //       phone_number: phoneNumber,
+      //     };
+      //     router.push({
+      //       pathname: "/(routes)/verification-phone-number",
+      //       params: driver,
+      //     });
+      //   })
+      //   .catch((error) => {
+      //     console.log(error);
+      //     setloading(false);
+      //     Toast.show(
+      //       "Something went wrong! please re check your phone number!",
+      //       {
+      //         type: "danger",
+      //         placement: "bottom",
+      //       }
+      //     );
+      //   });
+      router.push("/(routes)/verification-phone-number");
+      setloading(false);
     }
   };
 

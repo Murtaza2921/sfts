@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.route";
 import Nylas from "nylas";
 import driverRouter from "./routes/driver.route";
+import cors from "cors";
 
 export const app = express();
 
@@ -18,6 +19,10 @@ app.use(express.json({ limit: "50mb" }));
 // cookie parserv
 app.use(cookieParser());
 
+app.use(cors({
+  origin: "http://192.168.10.14:8081", // Expo Go URL, adjust if necessary
+  methods: ["GET", "POST"],
+}));
 // routes
 app.use("/api/v1", userRouter);
 app.use("/api/v1/driver", driverRouter);
