@@ -123,7 +123,7 @@ export default function RidePlanScreen() {
   }, []);
 
   const initializeWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.10.14:8080");
+    ws.current = new WebSocket("ws://192.168.10.12:8080");
     ws.current.onopen = () => {
       console.log("Connected to websocket server");
       setWsConnected(true);
@@ -439,7 +439,8 @@ export default function RidePlanScreen() {
         destinationLocationName.data.results[0].formatted_address,
     };
     console.log("step 10 : ", data);
-    const driverPushToken = "ExponentPushToken[47XbPbGpyW6XRt_2A_rqQd]";
+    const driverPushToken = "ExponentPushToken[oA3Ll7LbRZ6LGwYJCz5B3k]";
+    //ExponentPushToken[47XbPbGpyW6XRt_2A_rqQd]
     console.log("step 11");
     await sendPushNotification(driverPushToken, JSON.stringify(data));
   };

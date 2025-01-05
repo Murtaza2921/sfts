@@ -5,8 +5,11 @@ import prisma from "../utils/prisma";
 import jwt from "jsonwebtoken";
 import { sendToken } from "../utils/send-token";
 import { nylas } from "../app";
+const bcrypt = require('bcrypt');
+
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+
 const client = twilio(accountSid, authToken, {
   lazyLoading: true,
 });
@@ -54,60 +57,27 @@ export const sendingOtpToPhone = async (
 };
 
 // verifying otp for login
-export const verifyPhoneOtpForLogin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { phone_number = "+88003135942921", otp } = req.body;
-    try {
-      // await client.verify.v2
-      //   .services(process.env.TWILIO_SERVICE_SID!)
-      //   .verificationChecks.create({
-      //     to: "+88003135942921",
-      //     code: otp,
-      //   });
-
-      const driver = await prisma.driver.findUnique({
-        where: {
-          phone_number,
-        },
-      });
-      sendToken(driver, res);
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: "Something went wrong!",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      success: false,
-    });
-  }
-};
-
-// verifying phone otp for registration
-// export const verifyPhoneOtpForRegistration = async (
+// export const verifyPhoneOtpForLogin = async (
 //   req: Request,
 //   res: Response,
 //   next: NextFunction
 // ) => {
 //   try {
-//     const { phone_number, otp } = req.body;
-
+//     const { phone_number = "+88003135942921", otp } = req.body;
 //     try {
-//       await client.verify.v2
-//         .services(process.env.TWILIO_SERVICE_SID!)
-//         .verificationChecks.create({
-//           to: phone_number,
-//           code: otp,
-//         });
+//       // await client.verify.v2
+//       //   .services(process.env.TWILIO_SERVICE_SID!)
+//       //   .verificationChecks.create({
+//       //     to: "+88003135942921",
+//       //     code: otp,
+//       //   });
 
-//       await sendingOtpToEmail(req, res);
+//       const driver = await prisma.driver.findUnique({
+//         where: {
+//           phone_number,
+//         },
+//       });
+//       sendToken(driver, res);
 //     } catch (error) {
 //       console.log(error);
 //       res.status(400).json({
@@ -122,85 +92,6 @@ export const verifyPhoneOtpForLogin = async (
 //     });
 //   }
 // };
-
-// sending otp to email
-
-
-
-
-
-// export const sendingOtpToEmail = async (req: Request, res: Response) => {
-//   try {
-//     const {
-//       name,
-//       country,
-//       phone_number,
-//       email,
-//       vehicle_type,
-//       registration_number,
-//       registration_date,
-//       driving_license,
-//       vehicle_color,
-//       rate,
-//     } = req.body;
-
-//     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
-//     const driver = {
-//       name,
-//       country,
-//       phone_number,
-//       email,
-//       vehicle_type,
-//       registration_number,
-//       registration_date,
-//       driving_license,
-//       vehicle_color,
-//       rate,
-//     };
-//     const token = jwt.sign(
-//       {
-//         driver,
-//         otp,
-//       },
-//       process.env.EMAIL_ACTIVATION_SECRET!,
-//       {
-//         expiresIn: "5m",
-//       }
-//     );
-//     try {
-//       await nylas.messages.send({
-//         identifier: process.env.USER_GRANT_ID!,
-//         requestBody: {
-//           to: [{ name: name, email: email }],
-//           subject: "Verify your email address!",
-//           body: `
-//             <p>Hi ${name},</p>
-//         <p>Your Ridewave verification code is ${otp}. If you didn't request for this OTP, please ignore this email!</p>
-//         <p>Thanks,<br>Ridewave Team</p>
-//             `,
-//         },
-//       });
-//       res.status(201).json({
-//         success: true,
-//         token,
-//       });
-//     } catch (error: any) {
-//       res.status(400).json({
-//         success: false,
-//         message: error.message,
-//       });
-//       console.log(error);
-//     }
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-// verifying email otp and creating driver account
-
-
-
 
 
 
@@ -306,62 +197,7 @@ export const verifyPhoneOtpForRegistration = async (
   }
 };
 
-
-// export const verifyingEmailOtp = async (req: Request, res: Response) => {
-//   try {
-//     const { otp, token } = req.body;
-
-//     const newDriver: any = jwt.verify(
-//       token,
-//       process.env.EMAIL_ACTIVATION_SECRET!
-//     );
-
-//     if (newDriver.otp !== otp) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "OTP is not correct or expired!",
-//       });
-//     }
-
-//     const {
-//       name,
-//       country,
-//       phone_number,
-//       email,
-//       vehicle_type,
-//       registration_number,
-//       registration_date,
-//       driving_license,
-//       vehicle_color,
-//       rate,
-//     } = newDriver.driver;
-
-//     const driver = await prisma.driver.create({
-//       data: {
-//         name,
-//         country,
-//         phone_number,
-//         email,
-//         vehicle_type,
-//         registration_number,
-//         registration_date,
-//         driving_license,
-//         vehicle_color,
-//         rate,
-//       },
-//     });
-//     sendToken(driver, res);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(400).json({
-//       success: false,
-//       message: "Your otp is expired!",
-//     });
-//   }
-// };
-
-// get logged in driver data
-
+ 
 export const verifyingEmailOtp = async (req: Request, res: Response) => {
   try {
     const { otp, token } = req.body;
@@ -369,20 +205,21 @@ export const verifyingEmailOtp = async (req: Request, res: Response) => {
     // Decode and verify the token
     const newDriver: any = jwt.verify(
       token,
-      process.env.EMAIL_ACTIVATION_SECRET!
+      process.env.ACCESS_TOKEN_SECRET!
     );
 
-    if (newDriver.otp !== otp) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP is not correct or expired!",
-      });
-    }
+    // if (newDriver.otp !== otp) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "OTP is not correct or expired!",
+    //   });
+    // }
 
     const {
       name,
       country,
       phone_number,
+      password,
       email,
       vehicle_type,
       registration_number,
@@ -417,6 +254,7 @@ export const verifyingEmailOtp = async (req: Request, res: Response) => {
         name,
         country,
         phone_number,
+        password : await bcrypt.hash(password, 10),
         email,
         vehicle_type,
         registration_number,
@@ -504,7 +342,8 @@ export const getDriversById = async (req: Request, res: Response) => {
     // Fetch drivers from database
     const drivers = await prisma.driver.findMany({
       where: {
-        id: { in: driverIds },
+        id: 1,
+        // id: { in: driverIds },
       },
     });
 
@@ -632,4 +471,137 @@ export const getAllRides = async (req: any, res: Response) => {
   res.status(201).json({
     rides,
   });
+};
+
+// export const verifyPhoneOtpForLogin = async (
+//   req: Request,
+//   res: Response,
+ 
+// ) => {
+//   try {
+//     const { email, phone_number , password } = req.body;
+
+//     if ((!email && !phone_number) || !password) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please provide contact and password.",
+//       });
+//     }
+
+//   // Create query object based on the provided contact information
+//   const query = email ? { email } : { phone_number };
+
+//   // Find user based on the provided contact (either email or phone number)
+//   const user = await prisma.driver.findUnique({
+//     where: query,
+//   });
+
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User does not exist. Please sign up first.",
+//       });
+//     }
+
+//     // Verify password
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+
+//     if (!isPasswordValid) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Invalid password. Please try again.",
+//       });
+//     }
+
+//     // Send access token
+//     await sendToken(user, res);
+//   } catch (error) {
+//     console.error("Error during login:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "An error occurred. Please try again later.",
+//     });
+//   }
+// };
+
+
+export const register = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const {
+      name,
+      country,
+      phone_number,
+      email,
+      password,
+      vehicle_type,
+      registration_number,
+      registration_date,
+      driving_license,
+      vehicle_color,
+      rate,
+    } = req.body.driver; // Extract fields from req.body.driver
+
+    // Validate required fields
+    if (
+      !name ||
+      !country ||
+      !phone_number ||
+      !email ||
+      !password ||
+      !vehicle_type ||
+      !registration_number ||
+      !registration_date ||
+      !driving_license ||
+      rate === undefined
+    ) {
+      return res.status(400).json({ message: 'All required fields must be provided.' });
+    }
+
+    // Validate vehicle_type
+    const validVehicleTypes = ['CAR', 'TRUCK', 'MOTORCYCLE', 'VAN', 'BUS'];
+    if (!validVehicleTypes.includes(vehicle_type)) {
+      return res.status(400).json({ message: `Invalid vehicle_type. Must be one of: ${validVehicleTypes.join(', ')}` });
+    }
+
+    // Check if the driver already exists
+    const existingDriver = await prisma.driver.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone_number },
+          { registration_number },
+          { driving_license },
+        ],
+      },
+    });
+
+    if (existingDriver) {
+      return res.status(409).json({ message: 'Driver already exists.' });
+    }
+
+    // Create new driver
+    const newDriver = await prisma.driver.create({
+      data: {
+        name,
+        country,
+        phone_number,
+        email,
+        password,
+        vehicle_type,
+        registration_number,
+        registration_date,
+        driving_license,
+        vehicle_color,
+        rate,
+      },
+    });
+
+    res.status(201).json({
+      message: 'Driver registered successfully.',
+      driver: newDriver,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };

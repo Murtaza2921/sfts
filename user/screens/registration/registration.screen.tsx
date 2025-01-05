@@ -6,19 +6,21 @@ import TitleView from "@/components/signup/title.view";
 import Input from "@/components/common/input";
 import Button from "@/components/common/button";
 import color from "@/themes/app.colors";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useToast } from "react-native-toast-notifications";
 
 export default function RegistrationScreen() {
+  const toast = useToast();
   const { colors } = useTheme();
-  const { user } = useLocalSearchParams() as any;
-  const parsedUser = JSON.parse(user);
   const [emailFormatWarning, setEmailFormatWarning] = useState("");
   const [showWarning, setShowWarning] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    phoneNumber: "",
+    phoneNumber: "",  // You can fetch this from a previous screen or capture as input.
     email: "",
+    password: "", // Add password field here
   });
   const [loading, setLoading] = useState(false);
 
@@ -28,40 +30,44 @@ export default function RegistrationScreen() {
       [key]: value,
     }));
   };
-  
 
   const handleSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password) {
+      setShowWarning(true);
+      return; // Stop if fields are empty
+    }
     setLoading(true);
-    await axios
-      .post(`${process.env.EXPO_PUBLIC_SERVER_URI}/email-otp-request`, {
-        email: formData.email,
+
+    try {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URI}/register`, {
         name: formData.name,
-        userId: parsedUser.id,
-      }) 
-      .then((res) => {
-        setLoading(false);
-        const userData: any = {
-          id: parsedUser.id,
-          name: formData.name,
-          email: formData.email,
-          phone_number: parsedUser.phone_number,
-          token: res.data.token,
-        };
-        router.push({
-          pathname: "/(routes)/email-verification",
-          params: { user: JSON.stringify(userData) },
-        });
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.log(error);
+        phone_number: formData.phoneNumber,
+        email: formData.email,
+        password: formData.password, // Send password as well
       });
+
+      setLoading(false);
+      const { token } = response.data;
+
+      // Store the token in AsyncStorage
+      await AsyncStorage.setItem("accessToken", token);
+
+      // Navigate to the home screen after successful registration
+      router.push("/(tabs)/home");
+    } catch (error) {
+      setLoading(false);
+      console.log("Registration error", error);
+      toast.show("Registration failed. Please try again.", {
+        type: "danger",
+        placement: "bottom",
+      });
+    }
   };
 
   return (
     <ScrollView>
       <View>
-        {/* logo */}
+        {/* Logo */}
         <Text
           style={{
             fontFamily: "TT-Octosquares-Medium",
@@ -73,9 +79,7 @@ export default function RegistrationScreen() {
           Ride Wave
         </Text>
         <View style={{ padding: windowWidth(20) }}>
-          <View
-            style={[styles.subView, { backgroundColor: colors.background }]}
-          >
+          <View style={[styles.subView, { backgroundColor: colors.background }]}>
             <View style={styles.space}>
               <TitleView
                 title={"Create your account"}
@@ -92,8 +96,10 @@ export default function RegistrationScreen() {
               <Input
                 title="Phone Number"
                 placeholder="Enter your phone number"
-                value={parsedUser?.phone_number}
-                disabled={true}
+                value={formData?.phoneNumber}
+                onChangeText={(text) => handleChange("phoneNumber", text)}
+                showWarning={showWarning && formData.phoneNumber === ""}
+                warning={"Please enter your phone number!"}
               />
               <Input
                 title="Email Address"
@@ -101,21 +107,22 @@ export default function RegistrationScreen() {
                 keyboardType="email-address"
                 value={formData.email}
                 onChangeText={(text) => handleChange("email", text)}
-                showWarning={
-                  (showWarning && formData.name === "") ||
-                  emailFormatWarning !== ""
-                }
-                warning={
-                  emailFormatWarning !== ""
-                    ? "Please enter your email!"
-                    : "Please enter a validate email!"
-                }
-                emailFormatWarning={emailFormatWarning}
+                showWarning={showWarning && formData.email === ""}
+                warning={"Please enter your email address!"}
+              />
+              <Input
+                title="Password"
+                placeholder="Enter your password"
+               
+                value={formData.password}
+                onChangeText={(text) => handleChange("password", text)}
+                showWarning={showWarning && formData.password === ""}
+                warning={"Please enter your password!"}
               />
               <View style={styles.margin}>
                 <Button
                   onPress={() => handleSubmit()}
-                  title="Next"
+                  title="Sign Up"
                   disabled={loading}
                   backgroundColor={color.buttonBg}
                   textColor={color.whiteColor}

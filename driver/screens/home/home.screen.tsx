@@ -52,7 +52,7 @@ export default function HomeScreen() {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [recentRides, setrecentRides] = useState([]);
-  const ws = new WebSocket("ws://192.168.10.14:8080");
+  const ws = new WebSocket("ws://192.168.10.12:8080");
 
   const { colors } = useTheme();
 
@@ -505,7 +505,7 @@ export default function HomeScreen() {
           marker,
           distance,
         };
-        const driverPushToken = "ExponentPushToken[A22bNzKGUMegAXVEqzDnUx]";
+        const driverPushToken = "ExponentPushToken[oA3Ll7LbRZ6LGwYJCz5B3k]";
 
         await sendPushNotification(driverPushToken, data);
 

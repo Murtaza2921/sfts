@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   phoneNumberInput: {
     width: windowWidth(326),
     height: windowHeight(39),
-    backgroundColor: color.lightGray,
+    //backgroundColor: color.lightGray,
     borderRadius: 4,
     marginHorizontal: windowHeight(9),
     justifyContent: "center",

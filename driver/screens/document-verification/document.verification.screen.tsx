@@ -47,14 +47,10 @@ export default function DocumentVerificationScreen() {
     };
 
     await axios
-      .post(`http://192.168.10.14:8000/api/v1/driver/send-otp`, {
-        phone_number: `+${driverData.phone_number}`,
-      })
+      .post(`http://192.168.10.12:8000/api/v1/driver/register`, { driver })
       .then((res) => {
-        router.push({
-          pathname: "/(routes)/verification-phone-number",
-          params: driver,
-        });
+        router.push("/(routes)/verification-phone-number");
+        //res.token
         setLoading(false);
       })
       .catch((error) => {

@@ -12,6 +12,8 @@ import Button from "@/components/common/button";
 import color from "@/themes/app.colors";
 import { router } from "expo-router";
 
+
+
 export default function SignupScreen() {
   const { colors } = useTheme();
   const [emailFormatWarning, setEmailFormatWarning] = useState("");
@@ -20,7 +22,8 @@ export default function SignupScreen() {
     name: "",
     phoneNumber: "",
     email: "",
-    country: "Bangladesh 🇧🇩",
+    country: "Pakistan 🇵🇰",
+    password: ""
   });
 
   const handleChange = (key: string, value: string) => {
@@ -51,7 +54,10 @@ export default function SignupScreen() {
         country: formData.country,
         phone_number: phone_number,
         email: formData.email,
+        password : formData.password
+        
       };
+      console.log("here is my driver : ", driverData)
       router.push({
         pathname: "/(routes)/document-verification",
         params: driverData,
@@ -124,6 +130,15 @@ export default function SignupScreen() {
                     : "Please enter a validate email!"
                 }
                 emailFormatWarning={emailFormatWarning}
+              />
+               <Input
+                title="Password"
+                placeholder="Enter your password"
+                //secureTextEntry={true} // Ensures text is hidden
+                value={formData.password}
+                onChangeText={(text) => handleChange("password", text)}
+                showWarning={showWarning && formData.password === ""}
+                warning={"Please enter your password!"}
               />
             </View>
             <View style={styles.margin}>

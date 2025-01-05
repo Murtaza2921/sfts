@@ -1,60 +1,86 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import AuthContainer from "@/utils/container/auth-container";
 import { windowHeight } from "@/themes/app.constant";
-import styles from "./styles";
 import Images from "@/utils/images";
 import SignInText from "@/components/login/signin.text";
 import { external } from "@/styles/external.style";
-import PhoneNumberInput from "@/components/login/phone-number.input";
+import ContactInput from "@/components/login/phone-number.input";
+import PasswordInput from "@/components/login/password.input";
 import Button from "@/components/common/button";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useToast } from "react-native-toast-notifications";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function LoginScreen() {
-  const [phone_number, setphone_number] = useState("");
-  const [loading, setloading] = useState(false);
-  const [countryCode, setCountryCode] = useState("+92");
+import styles from "./styles"; // Import your existing styles
+
+interface LoginScreenProps {}
+
+const LoginScreen: React.FC<LoginScreenProps> = () => {
+  const [phone_number, setphone_number] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [loading, setloading] = useState<boolean>(false);
+  const [countryCode, setCountryCode] = useState<string>("+92");
+  const [password, setPassword] = useState<string>("");
   const toast = useToast();
+  const router = useRouter(); // For navigation
 
   const handleSubmit = async () => {
-    if (phone_number === "" || countryCode === "") {
-      toast.show("Please fill the fields!", {
+    if (email.trim() === "" && phone_number.trim() === "") {
+      toast.show("Please provide either an email or a phone number!", {
         placement: "bottom",
       });
-    } else {
-      setloading(true);
-      //const phoneNumber = `${countryCode}${phone_number}`;
-      const phoneNumber = "+923135942921";
-      console.log(phoneNumber);
-      await axios
-        .post(`${process.env.EXPO_PUBLIC_SERVER_URI}/registration`, {
-          phone_number: phoneNumber,
-        })
-        .then((res) => {
-          setloading(false);
-          router.push({
-            pathname: "/(routes)/otp-verification",
-            params: { phoneNumber },
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          setloading(false);
-          toast.show(
-            "Something went wrong! please re check your phone number!",
-            {
-              type: "danger",
-              placement: "bottom",
-            }
-          );
-        });
-      //router.push("/(tabs)/home"); // Directly navigate to /tabs/home screen without phone number verification
+      return;
+    }
+    
+    if (password.trim() === "") {
+      toast.show("Password is required!", {
+        placement: "bottom",
+      });
+      return;
+    }
 
+    setloading(true);
+
+    try {
+      // Send `contact` and `password` to the server
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URI}/login`, {
+        email,
+        phone_number,
+        password,
+      });
+
+      // Handle success response
+      const { accessToken } = response.data;
+
+      // Save token to AsyncStorage
+      await AsyncStorage.setItem("accessToken", accessToken);
+
+      // Navigate to the next screen (e.g., home or dashboard)
+      router.push("/(tabs)/home"); // Adjust this path to your actual route
+    } catch (error) {
+      console.error("Login Error:", error);
+
+      toast.show("Something went wrong in login", {
+        type: "danger",
+        placement: "bottom",
+      });
+    } finally {
       setloading(false);
     }
   };
+
+  const handleSignUp = () => {
+    // Navigate to the Sign Up screen (you can adjust the path to your sign-up screen)
+    router.push("/(routes)/registration");
+  };
+  const handleForgotPassword = () => {
+    // Navigate to the Forgot Password screen (adjust the path to your actual route)
+    
+    router.push("/(routes)/forget-password");
+  };
+
   return (
     <AuthContainer
       topSpace={windowHeight(150)}
@@ -62,28 +88,56 @@ export default function LoginScreen() {
       container={
         <View>
           <View>
-            <View>
-              <Image style={styles.transformLine} source={Images.line} />
-              <SignInText />
-              <View style={[external.mt_25, external.Pb_10]}>
-                <PhoneNumberInput
-                  phone_number={phone_number}
-                  setphone_number={setphone_number}
-                  countryCode={countryCode}
-                  setCountryCode={setCountryCode}
+            <Image style={styles.transformLine} source={Images.line} />
+            <SignInText />
+            <View style={[external.mt_25, external.Pb_10]}>
+              <ContactInput
+                phone_number={phone_number}
+                setphone_number={setphone_number}
+                email={email}
+                setEmail={setEmail}
+                countryCode={countryCode}
+                setCountryCode={setCountryCode}
+              />
+              <PasswordInput
+                password={password}
+                setPassword={setPassword}
+                placeholder="Enter your password"
+              />
+              <View style={[external.mt_25, external.Pb_15]}>
+                <Button
+                  title="Login"
+                  onPress={() => handleSubmit()}
+                  disabled={loading}
                 />
-                <View style={[external.mt_25, external.Pb_15]}>
-                  <Button
-                    title="Get Otp"
-                    onPress={() => handleSubmit()}
-                    disabled={loading}
-                  />
-                </View>
               </View>
+              <TouchableOpacity onPress={handleForgotPassword} style={styles.signUpText}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+              {/* Sign Up Button */}
+              <TouchableOpacity onPress={handleSignUp} style={styles.signUpText}>
+                <Text style={styles.signUpText}>
+                  Don't have an account? Sign Up
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       }
     />
   );
-}
+};
+
+const signUpStyles = StyleSheet.create({
+  signUpButton: {
+    marginTop: windowHeight(15),
+    alignSelf: "center",
+  },
+  signUpText: {
+    color: "#888", // Adjust color to your design
+    textDecorationLine: "underline",
+    fontSize: 16,
+  },
+});
+
+export default LoginScreen;

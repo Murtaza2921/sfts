@@ -30,6 +30,7 @@ export type Color = {
   selectPrimary: string;
   secondaryFont: string;
   red: string;
+  inactive: string;
 };
 
 const color: Color = {
@@ -64,6 +65,7 @@ const color: Color = {
   iconRed: "#FEEBEB",
   darkBorder: "#474747",
   selectPrimary: "#E8F4F1",
+  inactive: "#b3b3b3",
 };
 
 export default color;

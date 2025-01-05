@@ -22,4 +22,4 @@ export const slides = [
   },
 ];
 
-export const ws = new WebSocket("ws://192.168.10.14:8080");
+export const ws = new WebSocket("ws://192.168.10.12:8080");
