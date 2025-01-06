@@ -31,6 +31,8 @@ export default function RegistrationScreen() {
     }));
   };
 
+  
+
   const handleSubmit = async () => {
     if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password) {
       setShowWarning(true);
