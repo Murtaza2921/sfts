@@ -31,6 +31,8 @@ export default function RegistrationScreen() {
     }));
   };
 
+  
+
   const handleSubmit = async () => {
     if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password) {
       setShowWarning(true);
@@ -76,14 +78,14 @@ export default function RegistrationScreen() {
             textAlign: "center",
           }}
         >
-          Ride Wave
+          Sfts Safe Ride
         </Text>
         <View style={{ padding: windowWidth(20) }}>
           <View style={[styles.subView, { backgroundColor: colors.background }]}>
             <View style={styles.space}>
               <TitleView
                 title={"Create your account"}
-                subTitle="Explore your life by joining Ride Wave"
+                subTitle="Explore your life by joining Sfts Safe Ride"
               />
               <Input
                 title="Name"

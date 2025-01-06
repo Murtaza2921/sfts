@@ -39,7 +39,7 @@ export default function HomeScreen() {
               fontSize: 25,
             }}
           >
-            Ride Wave
+            Sfts Safe Ride
           </Text>
           <LocationSearchBar />
         </View>
