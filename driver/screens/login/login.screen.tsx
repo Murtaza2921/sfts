@@ -33,7 +33,9 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
       });
       return;
     }
-    
+   
+    const phonenumber = `${countryCode}${phone_number}`;
+    console.log("here is number : ", phonenumber)
     if (password.trim() === "") {
       toast.show("Password is required!", {
         placement: "bottom",
@@ -45,9 +47,9 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 
     try {
       // Send `contact` and `password` to the server
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URI}/login`, {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URI}/driver/login`, {
         email,
-        phone_number,
+        phonenumber,
         password,
       });
 

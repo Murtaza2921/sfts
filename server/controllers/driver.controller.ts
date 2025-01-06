@@ -10,282 +10,240 @@ const bcrypt = require('bcrypt');
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
-const client = twilio(accountSid, authToken, {
-  lazyLoading: true,
-});
-
 // sending otp to driver phone number
-export const sendingOtpToPhone = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { phone_number } = req.body;
-    console.log(phone_number);
-
-    // Mocking the Twilio API call
-    try {
-      // Simulating a successful Twilio response
-      // You can mock a failure by changing the condition later if needed
-      const mockTwilioResponse = { success: true };
-
-      if (mockTwilioResponse.success) {
-        // Simulate successful response from Twilio API
-        res.status(201).json({
-          success: true,
-          message: 'OTP sent successfully (mocked)',
-        });
-      } else {
-        // Simulate an error response from Twilio
-        throw new Error('Twilio API call failed');
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({
-        success: false,
-        message: 'Failed to send OTP (mocked)',
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      success: false,
-      message: 'Unexpected error occurred',
-    });
-  }
-};
-
-// verifying otp for login
-// export const verifyPhoneOtpForLogin = async (
+// export const sendingOtpToPhone = async (
 //   req: Request,
 //   res: Response,
 //   next: NextFunction
 // ) => {
 //   try {
-//     const { phone_number = "+88003135942921", otp } = req.body;
-//     try {
-//       // await client.verify.v2
-//       //   .services(process.env.TWILIO_SERVICE_SID!)
-//       //   .verificationChecks.create({
-//       //     to: "+88003135942921",
-//       //     code: otp,
-//       //   });
+//     const { phone_number } = req.body;
+//     console.log(phone_number);
 
-//       const driver = await prisma.driver.findUnique({
-//         where: {
-//           phone_number,
-//         },
-//       });
-//       sendToken(driver, res);
+//     // Mocking the Twilio API call
+//     try {
+//       // Simulating a successful Twilio response
+//       // You can mock a failure by changing the condition later if needed
+//       const mockTwilioResponse = { success: true };
+
+//       if (mockTwilioResponse.success) {
+//         // Simulate successful response from Twilio API
+//         res.status(201).json({
+//           success: true,
+//           message: 'OTP sent successfully (mocked)',
+//         });
+//       } else {
+//         // Simulate an error response from Twilio
+//         throw new Error('Twilio API call failed');
+//       }
 //     } catch (error) {
 //       console.log(error);
 //       res.status(400).json({
 //         success: false,
-//         message: "Something went wrong!",
+//         message: 'Failed to send OTP (mocked)',
 //       });
 //     }
 //   } catch (error) {
 //     console.log(error);
 //     res.status(400).json({
 //       success: false,
+//       message: 'Unexpected error occurred',
 //     });
 //   }
 // };
 
 
+// export const sendingOtpToEmail = async (req: Request) => {
+//   try {
+//     const {
+//       name,
+//       country,
+//       phone_number,
+//       email,
+//       vehicle_type,
+//       registration_number,
+//       registration_date,
+//       driving_license,
+//       vehicle_color,
+//       rate,
+//     } = req.body;
 
-export const sendingOtpToEmail = async (req: Request) => {
-  try {
-    const {
-      name,
-      country,
-      phone_number,
-      email,
-      vehicle_type,
-      registration_number,
-      registration_date,
-      driving_license,
-      vehicle_color,
-      rate,
-    } = req.body;
+//     const otp = "1234";
+//     const driver = {
+//       name,
+//       country,
+//       phone_number,
+//       email,
+//       vehicle_type,
+//       registration_number,
+//       registration_date,
+//       driving_license,
+//       vehicle_color,
+//       rate,
+//     };
 
-    const otp = "1234";
-    const driver = {
-      name,
-      country,
-      phone_number,
-      email,
-      vehicle_type,
-      registration_number,
-      registration_date,
-      driving_license,
-      vehicle_color,
-      rate,
-    };
+//     const token = jwt.sign(
+//       {
+//         driver,
+//         otp,
+//       },
+//       process.env.EMAIL_ACTIVATION_SECRET!,
+//       {
+//         expiresIn: "5m",
+//       }
+//     );
 
-    const token = jwt.sign(
-      {
-        driver,
-        otp,
-      },
-      process.env.EMAIL_ACTIVATION_SECRET!,
-      {
-        expiresIn: "5m",
-      }
-    );
+//     // Mocking email sending
+//     console.log(`Email not sent. OTP for ${name} is: ${otp}`);
 
-    // Mocking email sending
-    console.log(`Email not sent. OTP for ${name} is: ${otp}`);
-
-    return {
-      success: true,
-      token,
-    };
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to send OTP to email");
-  }
-};
-
+//     return {
+//       success: true,
+//       token,
+//     };
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error("Failed to send OTP to email");
+//   }
+// };
 
 
-export const verifyPhoneOtpForRegistration = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { phone_number, otp } = req.body;
 
-    console.log(
-      `Verifying OTP for phone number: ${phone_number} with OTP: ${otp}`
-    );
+// export const verifyPhoneOtpForRegistration = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { phone_number, otp } = req.body;
 
-    // Mock Twilio OTP verification
-    const mockTwilioResponse = { success: true }; // Simulate a successful response
+//     console.log(
+//       `Verifying OTP for phone number: ${phone_number} with OTP: ${otp}`
+//     );
 
-    if (mockTwilioResponse.success) {
-      console.log("Phone OTP verified successfully (mocked)");
+//     // Mock Twilio OTP verification
+//     const mockTwilioResponse = { success: true }; // Simulate a successful response
 
-      try {
-        const emailOtpResponse = await sendingOtpToEmail(req);
-        console.log("token : ", emailOtpResponse.token)
-        res.status(200).json({
-          success: true,
-          message: "Phone OTP verified successfully, moving to email OTP process.",
-          emailToken: emailOtpResponse.token,
-        });
-      } catch (error) {
-        res.status(500).json({
-          success: false,
-          message: error,
-        });
-      }
-    } else {
-      res.status(400).json({
-        success: false,
-        message: "Invalid OTP",
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Unexpected error during phone OTP verification.",
-    });
-  }
-};
+//     if (mockTwilioResponse.success) {
+//       console.log("Phone OTP verified successfully (mocked)");
+
+//       try {
+//         const emailOtpResponse = await sendingOtpToEmail(req);
+//         console.log("token : ", emailOtpResponse.token)
+//         res.status(200).json({
+//           success: true,
+//           message: "Phone OTP verified successfully, moving to email OTP process.",
+//           emailToken: emailOtpResponse.token,
+//         });
+//       } catch (error) {
+//         res.status(500).json({
+//           success: false,
+//           message: error,
+//         });
+//       }
+//     } else {
+//       res.status(400).json({
+//         success: false,
+//         message: "Invalid OTP",
+//       });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Unexpected error during phone OTP verification.",
+//     });
+//   }
+// };
 
  
-export const verifyingEmailOtp = async (req: Request, res: Response) => {
-  try {
-    const { otp, token } = req.body;
+// export const verifyingEmailOtp = async (req: Request, res: Response) => {
+//   try {
+//     const { otp, token } = req.body;
 
-    // Decode and verify the token
-    const newDriver: any = jwt.verify(
-      token,
-      process.env.ACCESS_TOKEN_SECRET!
-    );
+//     // Decode and verify the token
+//     const newDriver: any = jwt.verify(
+//       token,
+//       process.env.ACCESS_TOKEN_SECRET!
+//     );
 
-    // if (newDriver.otp !== otp) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "OTP is not correct or expired!",
-    //   });
-    // }
+//     // if (newDriver.otp !== otp) {
+//     //   return res.status(400).json({
+//     //     success: false,
+//     //     message: "OTP is not correct or expired!",
+//     //   });
+//     // }
 
-    const {
-      name,
-      country,
-      phone_number,
-      password,
-      email,
-      vehicle_type,
-      registration_number,
-      registration_date,
-      driving_license,
-      vehicle_color,
-      rate,
-    } = newDriver.driver;
+//     const {
+//       name,
+//       country,
+//       phone_number,
+//       password,
+//       email,
+//       vehicle_type,
+//       registration_number,
+//       registration_date,
+//       driving_license,
+//       vehicle_color,
+//       rate,
+//     } = newDriver.driver;
 
-    // Check if the email or phone number already exists
-    const existingDriver = await prisma.driver.findFirst({
-      where: {
-        OR: [
-          { email },
-          { phone_number },
-        ],
-      },
-    });
+//     // Check if the email or phone number already exists
+//     const existingDriver = await prisma.driver.findFirst({
+//       where: {
+//         OR: [
+//           { email },
+//           { phone_number },
+//         ],
+//       },
+//     });
 
-    if (existingDriver) {
-      const conflictField =
-        existingDriver.email === email ? "email" : "phone number";
-      return res.status(400).json({
-        success: false,
-        message: `A driver with this ${conflictField} already exists.`,
-      });
-    }
+//     if (existingDriver) {
+//       const conflictField =
+//         existingDriver.email === email ? "email" : "phone number";
+//       return res.status(400).json({
+//         success: false,
+//         message: `A driver with this ${conflictField} already exists.`,
+//       });
+//     }
 
-    // Create a new driver if no conflicts
-    const driver = await prisma.driver.create({
-      data: {
-        name,
-        country,
-        phone_number,
-        password : await bcrypt.hash(password, 10),
-        email,
-        vehicle_type,
-        registration_number,
-        registration_date,
-        driving_license,
-        vehicle_color,
-        rate,
-      },
-    });
+//     // Create a new driver if no conflicts
+//     const driver = await prisma.driver.create({
+//       data: {
+//         name,
+//         country,
+//         phone_number,
+//         password : await bcrypt.hash(password, 10),
+//         email,
+//         vehicle_type,
+//         registration_number,
+//         registration_date,
+//         driving_license,
+//         vehicle_color,
+//         rate,
+//       },
+//     });
 
-    // Send token for the newly created driver
-    sendToken(driver, res);
-  } catch (error: any) {
-    console.error(error);
+//     // Send token for the newly created driver
+//     sendToken(driver, res);
+//   } catch (error: any) {
+//     console.error(error);
 
-    if (error.code === "P2002") {
-      // Unique constraint violation occurred
-      const conflictingField = error.meta?.target.replace("driver_", ""); // Prisma provides the field causing the error
-      return res.status(400).json({
-        success: false,
-        message: `A driver with this ${conflictingField} already exists.`,
-      });
-    }
+//     if (error.code === "P2002") {
+//       // Unique constraint violation occurred
+//       const conflictingField = error.meta?.target.replace("driver_", ""); // Prisma provides the field causing the error
+//       return res.status(400).json({
+//         success: false,
+//         message: `A driver with this ${conflictingField} already exists.`,
+//       });
+//     }
 
-    // Handle other unexpected errors
-    res.status(500).json({
-      success: false,
-      message: "An unexpected error occurred. Please try again.",
-    });
-  }
-};
+//     // Handle other unexpected errors
+//     res.status(500).json({
+//       success: false,
+//       message: "An unexpected error occurred. Please try again.",
+//     });
+//   }
+// };
 
 
 
@@ -473,56 +431,56 @@ export const getAllRides = async (req: any, res: Response) => {
   });
 };
 
-// export const verifyPhoneOtpForLogin = async (
-//   req: Request,
-//   res: Response,
+export const driverLoin = async (
+  req: Request,
+  res: Response,
  
-// ) => {
-//   try {
-//     const { email, phone_number , password } = req.body;
+) => {
+  try {
+    const { email, phonenumber , password } = req.body;
 
-//     if ((!email && !phone_number) || !password) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Please provide contact and password.",
-//       });
-//     }
+    if ((!email && !phonenumber) || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide contact and password.",
+      });
+    }
+const phone_number = phonenumber
+  // Create query object based on the provided contact information
+  const query = email ? { email } : { phone_number };
 
-//   // Create query object based on the provided contact information
-//   const query = email ? { email } : { phone_number };
+  // Find user based on the provided contact (either email or phone number)
+  const user = await prisma.driver.findUnique({
+    where: query,
+  });
 
-//   // Find user based on the provided contact (either email or phone number)
-//   const user = await prisma.driver.findUnique({
-//     where: query,
-//   });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User does not exist. Please sign up first.",
+      });
+    }
 
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User does not exist. Please sign up first.",
-//       });
-//     }
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-//     // Verify password
-//     const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password. Please try again.",
+      });
+    }
 
-//     if (!isPasswordValid) {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Invalid password. Please try again.",
-//       });
-//     }
-
-//     // Send access token
-//     await sendToken(user, res);
-//   } catch (error) {
-//     console.error("Error during login:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "An error occurred. Please try again later.",
-//     });
-//   }
-// };
+    // Send access token
+    await sendToken(user, res);
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again later.",
+    });
+  }
+};
 
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -568,9 +526,9 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       where: {
         OR: [
           { email },
-          { phone_number },
-          { registration_number },
-          { driving_license },
+          // { phone_number },
+          // { registration_number },
+          // { driving_license },
         ],
       },
     });
@@ -586,7 +544,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         country,
         phone_number,
         email,
-        password,
+        password :  await bcrypt.hash(password, 10),
         vehicle_type,
         registration_number,
         registration_date,
@@ -596,10 +554,21 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       },
     });
 
-    res.status(201).json({
-      message: 'Driver registered successfully.',
-      driver: newDriver,
-    });
+  const token = jwt.sign(
+         { id: newDriver.id },
+         process.env.ACCESS_TOKEN_SECRET!,
+         {
+           expiresIn: "30d",
+         }
+       );
+      
+  
+      // Send token in the response (you can also redirect to the home screen after registration)
+      res.status(201).json({
+        success: true,
+        message: "Registration successful.",
+        token,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Internal server error' });

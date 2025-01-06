@@ -12,6 +12,7 @@ import color from "@/themes/app.colors";
 import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import { Toast } from "react-native-toast-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function DocumentVerificationScreen() {
   const driverData = useLocalSearchParams();
@@ -47,11 +48,12 @@ export default function DocumentVerificationScreen() {
     };
 
     await axios
-      .post(`http://192.168.18.36:8000/api/v1/driver/register`, { driver })
+      .post(`http://192.168.10.12:8000/api/v1/driver/register`, { driver })
       .then((res) => {
-        router.push("/(routes)/verification-phone-number");
-        //res.token
-        setLoading(false);
+        
+        const { token } = res.data;
+        AsyncStorage.setItem("accessToken", token);
+        router.push("/(tabs)/home");
       })
       .catch((error) => {
         setLoading(false);

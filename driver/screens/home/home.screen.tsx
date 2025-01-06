@@ -13,7 +13,6 @@ import { recentRidesData, rideData } from "@/configs/constants";
 import { useTheme } from "@react-navigation/native";
 import RenderRideItem from "@/components/ride/render.ride.item";
 import { external } from "@/styles/external.style";
-import styles from "./styles";
 import RideCard from "@/components/ride/ride.card";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
@@ -30,7 +29,7 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { router } from "expo-router";
-
+import styles from "./styles";
 export default function HomeScreen() {
   const notificationListener = useRef<any>();
   const { driver, loading: DriverDataLoading } = useGetDriverData();
@@ -52,7 +51,7 @@ export default function HomeScreen() {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [recentRides, setrecentRides] = useState([]);
-  const ws = new WebSocket("ws://192.168.18.36:8080");
+  const ws = new WebSocket("ws://192.168.10.12:8080");
 
   const { colors } = useTheme();
 
@@ -64,50 +63,7 @@ export default function HomeScreen() {
     }),
   });
 
-  // useEffect(() => {
-  //   notificationListener.current =
-  //     Notifications.addNotificationReceivedListener((notification) => {
-  //       // Handle the notification and extract data
-  //       const orderData = JSON.parse(
-  //         notification.request.content.data.orderData
-  //       );
-  //       setIsModalVisible(true);
-  //       setCurrentLocation({
-  //         latitude: orderData.currentLocation.latitude,
-  //         longitude: orderData.currentLocation.longitude,
-  //       });
-  //       setMarker({
-  //         latitude: orderData.marker.latitude,
-  //         longitude: orderData.marker.longitude,
-  //       });
-  //       setRegion({
-  //         latitude:
-  //           (orderData.currentLocation.latitude + orderData.marker.latitude) /
-  //           2,
-  //         longitude:
-  //           (orderData.currentLocation.longitude + orderData.marker.longitude) /
-  //           2,
-  //         latitudeDelta:
-  //           Math.abs(
-  //             orderData.currentLocation.latitude - orderData.marker.latitude
-  //           ) * 2,
-  //         longitudeDelta:
-  //           Math.abs(
-  //             orderData.currentLocation.longitude - orderData.marker.longitude
-  //           ) * 2,
-  //       });
-  //       setdistance(orderData.distance);
-  //       setcurrentLocationName(orderData.currentLocationName);
-  //       setdestinationLocationName(orderData.destinationLocation);
-  //       setUserData(orderData.user);
-  //     });
-
-  //   return () => {
-  //     Notifications.removeNotificationSubscription(
-  //       notificationListener.current
-  //     );
-  //   };
-  // }, []);
+ 
 
   useEffect(() => {
     console.log("useEffect triggered");
@@ -479,6 +435,10 @@ export default function HomeScreen() {
       });
   };
 
+  const handleChat = async () => {
+
+  }
+
   const acceptRideHandler = async () => {
     const accessToken = await AsyncStorage.getItem("accessToken");
     await axios
@@ -639,6 +599,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
     </View>
   );
 }
