@@ -47,7 +47,7 @@ export default function DocumentVerificationScreen() {
     };
 
     await axios
-      .post(`http://192.168.10.12:8000/api/v1/driver/register`, { driver })
+      .post(`http://192.168.18.36:8000/api/v1/driver/register`, { driver })
       .then((res) => {
         router.push("/(routes)/verification-phone-number");
         //res.token
@@ -74,7 +74,7 @@ export default function DocumentVerificationScreen() {
             textAlign: "center",
           }}
         >
-          Ride Wave
+          Sfts Safe Ride
         </Text>
         <View style={{ padding: windowWidth(20) }}>
           <ProgressBar fill={2} />
@@ -84,7 +84,7 @@ export default function DocumentVerificationScreen() {
             <View style={styles.space}>
               <TitleView
                 title={"Vehicle Registration"}
-                subTitle={"Explore your life by joining Ride Wave"}
+                subTitle={"Explore your life by joining Sfts Safe Ride"}
               />
               <SelectInput
                 title="Vehicle Type"

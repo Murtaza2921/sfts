@@ -558,7 +558,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     }
 
     // Validate vehicle_type
-    const validVehicleTypes = ['CAR', 'TRUCK', 'MOTORCYCLE', 'VAN', 'BUS'];
+    const validVehicleTypes = ['Car', 'TRUCK', 'MOTORCYCLE', 'VAN', 'BUS'];
     if (!validVehicleTypes.includes(vehicle_type)) {
       return res.status(400).json({ message: `Invalid vehicle_type. Must be one of: ${validVehicleTypes.join(', ')}` });
     }

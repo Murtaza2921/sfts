@@ -123,7 +123,7 @@ export default function RidePlanScreen() {
   }, []);
 
   const initializeWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.10.12:8080");
+    ws.current = new WebSocket("ws://192.168.18.36:8080");
     ws.current.onopen = () => {
       console.log("Connected to websocket server");
       setWsConnected(true);
@@ -369,7 +369,7 @@ export default function RidePlanScreen() {
     const response = await axios.get(
       `${process.env.EXPO_PUBLIC_SERVER_URI}/driver/get-drivers-data`,
       {
-        params: { ids: driverIds },
+        params: { ids: "1" },
       }
     );
     console.log("step 6");
@@ -439,9 +439,10 @@ export default function RidePlanScreen() {
         destinationLocationName.data.results[0].formatted_address,
     };
     console.log("step 10 : ", data);
-    const driverPushToken = "ExponentPushToken[oA3Ll7LbRZ6LGwYJCz5B3k]";
+    const driverPushToken = "ExponentPushToken[ZCHrTtH1HZfOvmk62vrD-Y]";
     //ExponentPushToken[47XbPbGpyW6XRt_2A_rqQd]
     console.log("step 11");
+    
     await sendPushNotification(driverPushToken, JSON.stringify(data));
   };
 
