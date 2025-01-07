@@ -43,15 +43,16 @@ export default function Input({
         style={[
           styles.input,
           {
-            backgroundColor: color.lightGray,
+            backgroundColor: disabled ? color.lightGray : "white", // Grayed-out background when disabled
             borderColor: colors.border,
+            color: disabled ? color.secondaryFont : colors.text, // Change text color if disabled
           },
         ]}
         placeholder={placeholder}
         placeholderTextColor={color.secondaryFont}
         keyboardType={keyboardType}
         value={value}
-        aria-disabled={disabled}
+        editable={!disabled} // Use the editable prop to disable the TextInput
         onChangeText={onChangeText}
       />
       {showWarning && <Text style={[styles.warning]}>{warning}</Text>}

@@ -34,3 +34,12 @@ app.get("/test", (req: Request, res: Response, next: NextFunction) => {
     message: "API is working",
   });
 });
+
+
+declare global {
+  namespace Express {
+    interface Request {
+      driver: any;  // You can replace `any` with the actual type for the driver, like `DriverType`
+    }
+  }
+}

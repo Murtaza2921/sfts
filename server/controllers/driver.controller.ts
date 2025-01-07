@@ -431,7 +431,7 @@ export const getAllRides = async (req: any, res: Response) => {
   });
 };
 
-export const driverLoin = async (
+export const driverLogin = async (
   req: Request,
   res: Response,
  
@@ -574,3 +574,39 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+declare global {
+  namespace Express {
+    interface Request {
+      driver: any; // You can replace `any` with a more specific driver type
+    }
+  }
+}
+
+export const updateDriver = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const driverId = req.driver.id;  // Get driver ID from req.driver
+    const updatedData = req.body;
+
+    // Validate input
+    if (!driverId || typeof driverId !== 'number') {
+      return res.status(400).json({ message: "Valid Driver ID is required" });
+    }
+
+    // Update the driver using Prisma's `update` method
+    const driver = await prisma.driver.update({
+      where: { id: driverId },  // Pass `id` inside an object
+      data: updatedData,
+    });
+
+    if (!driver) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+
+    res.status(200).json({ message: "Driver updated successfully", driver });
+  } catch (error) {
+    console.error("Error updating driver:", error);
+    res.status(500).json({ message: "Error updating driver data", error });
+  }
+};
+

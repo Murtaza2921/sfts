@@ -8,7 +8,8 @@ import {
   updateDriverStatus,
   updatingRideStatus,
  // verifyingEmailOtp,
-  driverLoin,
+  driverLogin,
+  updateDriver,
   //verifyPhoneOtpForRegistration,
 } from "../controllers/driver.controller";
 import { isAuthenticatedDriver } from "../middleware/isAuthenticated";
@@ -17,13 +18,15 @@ const driverRouter = express.Router();
 
 driverRouter.post("/register", register);
 
-driverRouter.post("/login", driverLoin);
+driverRouter.post("/login", driverLogin);
 
 //driverRouter.post("/verify-otp", verifyPhoneOtpForRegistration);
 
 //driverRouter.post("/registration-driver", verifyingEmailOtp);
 
 driverRouter.get("/me", isAuthenticatedDriver, getLoggedInDriverData);
+
+driverRouter.put("/me", isAuthenticatedDriver, updateDriver);
 
 driverRouter.get("/get-drivers-data", getDriversById);
 
