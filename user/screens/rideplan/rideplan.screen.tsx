@@ -57,6 +57,7 @@ export default function RidePlanScreen() {
   
   const [locationSelected, setlocationSelected] = useState(false);
   const [pushTokenRef, setpushTokenRef] = useState("");
+  const [isBookingConfirmed, setIsBookingConfirmed] = useState<boolean>(false);
   const [selectedVehcile, setselectedVehcile] = useState("Car");
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
   const [travelTimes, setTravelTimes] = useState({
@@ -445,32 +446,46 @@ export default function RidePlanScreen() {
   
 
   const handleOrder = async () => {
-    console.log("step 8");
-    const currentLocationName = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLocation?.latitude},${currentLocation?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
-    );
-    const destinationLocationName = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker?.latitude},${marker?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
-    );
-    console.log("step 9");
-    const data = {
-      user,
-      currentLocation,
-      marker,
-      distance: distance.toFixed(2),
-      currentLocationName:
-        currentLocationName.data.results[0].formatted_address,
-      destinationLocation:
-        destinationLocationName.data.results[0].formatted_address,
-    };
-    console.log("step 10 : ", data);
-    const driverPushToken = pushTokenRef; 
-    console.error("Push token is not available",driverPushToken);
-    if (driverPushToken) {
-      console.log("step 11");
-      await sendPushNotification(driverPushToken, JSON.stringify(data));
-    } else {
-      console.error("Push token is not available");
+    if (!selectedDriverId) return;
+  
+    setIsBookingConfirmed(true); // Disable button
+  
+    try {
+      console.log("step 8");
+  
+      const currentLocationName = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLocation?.latitude},${currentLocation?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
+      );
+  
+      const destinationLocationName = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker?.latitude},${marker?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
+      );
+  
+      console.log("step 9");
+  
+      const data = {
+        user,
+        currentLocation,
+        marker,
+        distance: distance.toFixed(2),
+        currentLocationName: currentLocationName.data.results[0].formatted_address,
+        destinationLocation: destinationLocationName.data.results[0].formatted_address,
+      };
+  
+      console.log("step 10 : ", data);
+  
+      if (pushTokenRef) {
+        console.log("step 11");
+        await sendPushNotification(pushTokenRef, JSON.stringify(data));
+        alert("Booking request sent successfully!");
+      } else {
+        console.error("Push token is not available");
+        alert("Driver push token is missing. Please select another driver.");
+      }
+    } catch (error) {
+      console.error("Error during booking process:", error);
+      alert("Failed to complete booking. Please try again.");
+      setIsBookingConfirmed(false); // Re-enable button on error
     }
   };
 
@@ -605,16 +620,16 @@ export default function RidePlanScreen() {
   }}
 >
   <Button
-    backgroundColor={selectedDriverId ? "#000" : "#d3d3d3"} // Change button color
-    textColor={selectedDriverId ? "#fff" : "#808080"}
-    title="Confirm Booking"
-    onPress={() => handleOrder()}
-    disabled={!selectedDriverId} // Disable button if no driver is selected
+    backgroundColor={selectedDriverId && !isBookingConfirmed ? "#000" : "#d3d3d3"} // Change button color
+    textColor={selectedDriverId && !isBookingConfirmed ? "#fff" : "#808080"}
+    title={isBookingConfirmed ? "Request Sent" : "Confirm Booking"}
+    onPress={handleOrder}
+    disabled={!selectedDriverId || isBookingConfirmed} // Disable button if no driver selected or booking confirmed
   />
 </View>
                   </View>
                 </ScrollView>
-              )}
+              )}  
             </>
           ) : (
             <>
