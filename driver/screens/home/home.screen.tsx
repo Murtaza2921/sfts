@@ -51,7 +51,7 @@ export default function HomeScreen() {
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [lastLocation, setLastLocation] = useState<any>(null);
   const [recentRides, setrecentRides] = useState([]);
-  const ws = new WebSocket("ws://192.168.10.12:8080");
+  const ws = new WebSocket("ws://192.168.116.148:8080");
 
   const { colors } = useTheme();
 
@@ -192,7 +192,24 @@ export default function HomeScreen() {
 
   // socket updates
   
-  
+  const savePushTokenToDatabase = async (pushToken: string) => {
+    console.log("Saving Push notifications")
+    const accessToken = await AsyncStorage.getItem("accessToken");
+    try {
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_SERVER_URI}/driver/save-push-token`,
+        { pushToken },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log("Push token saved to the database successfully:", response.data);
+    } catch (error) {
+      console.error("Failed to save push token to the database:", error);
+    }
+  };
   async function registerForPushNotificationsAsync() {
     if (Device.isDevice) {
       const { status: existingStatus } =
@@ -212,11 +229,13 @@ export default function HomeScreen() {
       const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ??
         Constants?.easConfig?.projectId;
+        
       if (!projectId) {
         Toast.show("Failed to get project id for push notification!", {
           type: "danger",
         });
       }
+   
       try {
         const pushTokenString = (
           await Notifications.getExpoPushTokenAsync({
@@ -224,6 +243,8 @@ export default function HomeScreen() {
           })
         ).data;
         console.log("my push token string : ", pushTokenString);
+        await savePushTokenToDatabase(pushTokenString);
+       
         // return pushTokenString;
       } catch (e: unknown) {
         Toast.show(`${e}`, {
@@ -465,7 +486,7 @@ export default function HomeScreen() {
           marker,
           distance,
         };
-        const driverPushToken = "ExponentPushToken[oA3Ll7LbRZ6LGwYJCz5B3k]";
+        const driverPushToken = "ExponentPushToken[EDe9pbITP8HUwFgN5qR69_]";
 
         await sendPushNotification(driverPushToken, data);
 
@@ -572,7 +593,7 @@ export default function HomeScreen() {
                 }}
               >
                 Amount:
-                {(distance * parseInt(driver?.rate!)).toFixed(2)} BDT
+                {(distance * parseInt(driver?.rate!)).toFixed(2)} PKR
               </Text>
               <View
                 style={{

@@ -4,6 +4,7 @@ import twilio from "twilio";
 import prisma from "../utils/prisma";
 import jwt from "jsonwebtoken";
 import { nylas } from "../app";
+import { Prisma } from '@prisma/client';
 import { sendToken } from "../utils/send-token";
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -89,6 +90,35 @@ export const getLoggedInUserData = async (req: any, res: Response) => {
   }
 };
 
+export const saveUserToken = async (req: any, res: Response) => {
+  const { pushToken } = req.body;
+  const userID = req.userId; // Assuming driver ID is extracted from the JWT or session middleware
+  console.log("User ID",userID)
+  if (!pushToken) {
+    return res.status(400).json({ error: 'Push token is required' });
+  }
+
+  try {
+    // Update or create the push token for the driver
+    await prisma.user.update({
+      where: { id: userID },
+      data: { notificationToken:pushToken },
+    });
+
+    return res.status(200).json({ message: 'Push token saved successfully' });
+  } catch (error) {
+    console.error('Error saving push token:', error);
+ // Narrow the error type
+ if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  if (error.code === 'P2025') {
+    return res.status(404).json({ error: 'Driver not found' });
+  }
+}
+
+console.error('Error saving push token:', error);
+return res.status(500).json({ error: 'Failed to save push token' });
+}
+};
 // getting user rides
 export const getAllRides = async (req: any, res: Response) => {
   const rides = await prisma.rides.findMany({

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "RideWave",
-    "slug": "RideWave",
+    "name": "Sfts Save Ride",
+    "slug": "sfts-ride-booking",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,7 +35,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/TT-Octosquares-Medium.ttf"]
+          "fonts": [
+            "./assets/fonts/TT-Octosquares-Medium.ttf"
+          ]
         }
       ]
     ],
@@ -46,6 +48,7 @@
       "eas": {
         "projectId": "0beffdfa-0d1a-43ba-aef1-b4758f72b103"
       }
-    }
+    },
+    "owner": "attauljalil"
   }
 }

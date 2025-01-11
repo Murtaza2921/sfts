@@ -36,6 +36,7 @@ export const isAuthenticated = (
         });
         // Attach the user data to the request object
         req.user = userData;
+        req.userId =userData?.id
         next();
       }
     );
@@ -77,7 +78,9 @@ export const isAuthenticatedDriver = (
           },
         });
         // Attach the user data to the request object
+       
         req.driver = driverData;
+        req.driverId = driverData?.id
         next();
       }
     );

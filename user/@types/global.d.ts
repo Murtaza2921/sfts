@@ -30,6 +30,7 @@ type DriverType = {
   driving_license: string;
   vehicle_color: string;
   rate: string;
+  notificationToken:string;
   ratings: number;
   totalEarning: number;
   totalRides: number;
