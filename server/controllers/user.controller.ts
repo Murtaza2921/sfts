@@ -156,3 +156,120 @@ export const loginUser = async (
     });
   }
 };
+
+
+
+export const addfamilyEvent = async (req: Request, res: Response) => {
+  const { 
+    from, 
+    fromCoords, 
+    destination, 
+    destinationCoords, 
+    eventDate, 
+    eventTime 
+  } = req.body;
+
+  try {
+    if (!from || !destination || !eventDate || !eventTime || !fromCoords || !destinationCoords) {
+      return res.status(400).send('Missing required fields');
+    }
+
+    const event = await prisma.event.create({
+      data: { 
+        from, 
+        fromLat: fromCoords.lat, 
+        fromLng: fromCoords.lng, 
+        destination, 
+        destinationLat: destinationCoords.lat, 
+        destinationLng: destinationCoords.lng, 
+        eventDate: new Date(eventDate), 
+        eventTime 
+      },
+    });
+
+    res.status(201).json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error saving event');
+  }
+};
+
+
+export const getUpcomingEvents = async (req: Request, res: Response) => {
+  const now = new Date();
+  try {
+    // Query upcoming events based on the current date and time
+    const events = await prisma.event.findMany({
+      where: {
+        eventDate: {
+          gte: now, // Greater than or equal to the current date and time
+        },
+      },
+    });
+    res.status(200).json(events); // Return the list of upcoming events
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching events'); // Handle error
+  }
+};
+
+
+
+export const deleteEvent = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const deletedEvent = await prisma.event.delete({
+      where: {
+        id: parseInt(id), // Convert the string id to integer
+      },
+    });
+    res.status(200).json(deletedEvent); // Return the deleted event data
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error deleting event');
+  }
+};
+
+
+// Add the route to edit an event
+
+
+export const editEvent = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {
+    from,
+    fromLat,
+    fromLng,
+    destination,
+    destinationLat,
+    destinationLng,
+    eventDate,
+    eventTime,
+  } = req.body;
+
+  try {
+    const updatedEvent = await prisma.event.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        from,
+        fromLat,
+        fromLng,
+        destination,
+        destinationLat,
+        destinationLng,
+        eventDate: new Date(eventDate),
+        eventTime,
+      },
+    });
+    res.status(200).json(updatedEvent); // Return the updated event data
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error updating event');
+  }
+};
+
+
+
+

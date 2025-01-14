@@ -3,7 +3,11 @@ import {
   getAllRides,
   getLoggedInUserData,
   registration,
-  loginUser
+  loginUser,
+  addfamilyEvent,
+  getUpcomingEvents,
+  deleteEvent,
+  editEvent
 } from "../controllers/user.controller";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 
@@ -12,6 +16,14 @@ const userRouter = express.Router();
 userRouter.post("/login", loginUser);
 
 userRouter.post("/register", registration);
+
+userRouter.delete("/deleteEvent/:id", deleteEvent);
+
+
+userRouter.post("/addfamilyEvent", addfamilyEvent);
+userRouter.get("/getUpcomingEvents", getUpcomingEvents);
+
+userRouter.put("/editEvent/:id", editEvent);
 
 
 userRouter.get("/me", isAuthenticated, getLoggedInUserData);
