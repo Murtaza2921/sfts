@@ -128,7 +128,7 @@ export default function RidePlanScreen() {
   }, []);
 
   const initializeWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.116.148:8080");
+    ws.current = new WebSocket("ws://192.168.18.36:8080");
     ws.current.onopen = () => {
       console.log("Connected to websocket server");
       setWsConnected(true);
@@ -562,24 +562,29 @@ export default function RidePlanScreen() {
                   </View>
                   <View style={{ padding: windowWidth(10) }}>
                  
-
                   {driverLists?.map((driver: DriverType) => (
   <Pressable
-    key={String(driver.id)} // Ensure key is a string
+    key={String(driver.id)}
     style={{
       width: windowWidth(420),
-      borderWidth: selectedDriverId === String(driver.id) ? 2 : 0, // Convert driver.id to string
+      borderWidth: selectedDriverId === String(driver.id) ? 2 : 1,  // Thin border for all items
+      borderColor: "#ccc",  // Light grey color for border
       borderRadius: 10,
       padding: 10,
-      marginVertical: 5,
+      marginVertical: 8,  // Slightly increased spacing for better separation
       backgroundColor: selectedDriverId === String(driver.id) ? "#e0f7fa" : "white",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 3,  // Elevation for Android shadow effect
     }}
     onPress={() => {
-      setSelectedDriverId(String(driver.id)); // Store driver.id as a string
+      setSelectedDriverId(String(driver.id));
       setpushTokenRef(driver.notificationToken);
     }}
   >
-    <View style={{ margin: "auto" }}>
+    <View style={{ alignItems: "center" }}>
       <Image
         source={
           driver?.vehicle_type === "Car"
@@ -596,6 +601,7 @@ export default function RidePlanScreen() {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        marginTop: 5,
       }}
     >
       <View>
@@ -612,6 +618,7 @@ export default function RidePlanScreen() {
     </View>
   </Pressable>
 ))}
+
 
 <View
   style={{

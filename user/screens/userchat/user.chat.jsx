@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 
 
-const ChatScreen = ({ route }) => {
+const UserChat = ({ route }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const { roomId, userId } = route.params; // Pass roomId and userId from navigation

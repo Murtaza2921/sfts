@@ -18,6 +18,15 @@ type UserType = {
   updatedAt: Date;
 };
 
+declare module "react-native-phone-call" {
+  export default function call(args: {
+    number: string;
+    prompt?: boolean;
+    skipCanOpen?: boolean;
+  }): void;
+}
+
+
 type DriverType = {
   id: string;
   name: string;
