@@ -48,7 +48,7 @@ export default function DocumentVerificationScreen() {
     };
 
     await axios
-      .post(`http://192.168.18.36:8000/api/v1/driver/register`, { driver })
+      .post(`http://192.168.116.148:8000/api/v1/driver/register`, { driver })
       .then((res) => {
         
         const { token } = res.data;
