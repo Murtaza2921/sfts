@@ -46,9 +46,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "0beffdfa-0d1a-43ba-aef1-b4758f72b103"
+        "projectId": "563d95b8-a1af-45ee-8959-87e32e4a9a40"
+      },
+      "router": {
+        "origin": false
       }
     },
-    "owner": "attauljalil"
+    "owner": "malikharis66"
   }
 }

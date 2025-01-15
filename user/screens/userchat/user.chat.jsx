@@ -6,7 +6,7 @@ const UserChat = ({ route }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const { roomId, userId } = route.params; // Pass roomId and userId from navigation
-  const ws = new WebSocket("ws://192.168.116.148:8080"); // Replace with your server URL
+  const ws = new WebSocket("ws://192.168.100.132:8080"); // Replace with your server URL
 
   useEffect(() => {
     // Connect to WebSocket and join the room
