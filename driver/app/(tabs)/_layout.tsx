@@ -2,6 +2,7 @@ import { Home } from "@/assets/icons/home";
 import { HomeLight } from "@/assets/icons/homeLight";
 import { Person } from "@/assets/icons/person";
 import { History } from "@/assets/icons/history";
+import { Calender } from "@/assets/icons/calender"; // Import a calendar icon (or any icon you want for events)
 import color from "@/themes/app.colors";
 import { Tabs } from "expo-router";
 import React from "react";
@@ -27,13 +28,23 @@ export default function TabLayout() {
               iconName = (
                 <History colors={focused ? color.buttonBg : "#8F8F8F"} />
               );
-            } else if (route.name === "profile/index") {
+            } 
+            
+            else if (route.name === "events/index") { // New Events tab
               if (focused) {
-                iconName = <Person fill={color.buttonBg} />;
+                iconName = <Calender fill={color.buttonBg}/>;
               } else {
-                iconName = <Person fill={"#8F8F8F"} />;
+                iconName = <Calender fill={"#8F8F8F"} />;
               }
             }
+            else if (route.name === "profile/index") {
+              if (focused) {
+                iconName = <Person fill={color.buttonBg} width={24} height={24} />;
+              } else {
+                iconName = <Person fill={"#8F8F8F"}  width={24} height={24} />;
+              }
+            } 
+           
             return iconName;
           },
         };
@@ -41,7 +52,8 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="home" />
       <Tabs.Screen name="rides/index" />
-      <Tabs.Screen name="profile/index" />
+      <Tabs.Screen name="events/index" />  
+      <Tabs.Screen name="profile/index" /> 
     </Tabs>
   );
 }

@@ -6,7 +6,7 @@ const ChatScreen = ({ route }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const { roomId, userId } = route.params; // Pass roomId and userId from navigation
-  const ws = new WebSocket("ws://192.168.10.8:8080"); // Replace with your server URL
+  const ws = new WebSocket("ws://192.168.18.50:8080"); // Replace with your server URL
 
   useEffect(() => {
     // Connect to WebSocket and join the room

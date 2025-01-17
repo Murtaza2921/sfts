@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import "react-native-get-random-values";
 import { Redirect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaProvider } from "react-native-safe-area-context"; // Import SafeAreaProvider
 
-export default function index() {
-  const [isLoggedIn, setisLoggedIn] = useState(false);
-  const [isLoading, setisLoading] = useState(true);
+export default function Index() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true; // flag to check if the component is mounted
@@ -13,7 +15,7 @@ export default function index() {
       try {
         const accessToken = await AsyncStorage.getItem("accessToken");
         if (isMounted) {
-          setisLoggedIn(!!accessToken);
+          setIsLoggedIn(!!accessToken);
         }
       } catch (error) {
         console.log(
@@ -22,7 +24,7 @@ export default function index() {
         );
       } finally {
         if (isMounted) {
-          setisLoading(false);
+          setIsLoading(false);
         }
       }
     };
@@ -38,5 +40,9 @@ export default function index() {
     return null;
   }
 
-  return <Redirect href={!isLoggedIn ? "/(routes)/login" : "/(tabs)/home"} />;
+  return (
+    <SafeAreaProvider>
+      <Redirect href={!isLoggedIn ? "/(routes)/login" : "/(tabs)/home"} />
+    </SafeAreaProvider>
+  );
 }
