@@ -7,7 +7,8 @@ import {
   addfamilyEvent,
   getUpcomingEvents,
   deleteEvent,
-  editEvent
+  editEvent,
+  getSharedRides
 } from "../controllers/user.controller";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 
@@ -29,5 +30,7 @@ userRouter.put("/editEvent/:id", editEvent);
 userRouter.get("/me", isAuthenticated, getLoggedInUserData);
 //,
 userRouter.get("/get-rides", isAuthenticated, getAllRides);
+
+userRouter.get('/shared-rides', getSharedRides);
 
 export default userRouter;

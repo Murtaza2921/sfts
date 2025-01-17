@@ -21,7 +21,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
   const [phone_number, setphone_number] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [loading, setloading] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState<string>("+92");
+  const [countryCode, setCountryCode] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const toast = useToast();
   const router = useRouter(); // For navigation
@@ -34,7 +34,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
       return;
     }
    
-    const phonenumber = `${countryCode}${phone_number}`;
+    const phonenumber = phone_number;
     console.log("here is number : ", phonenumber)
     if (password.trim() === "") {
       toast.show("Password is required!", {

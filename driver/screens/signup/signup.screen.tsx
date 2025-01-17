@@ -47,7 +47,7 @@ export default function SignupScreen() {
         (i: any) => i.label === formData.country
       );
 
-      const phone_number = `+${phoneNumberData?.value}${formData.phoneNumber}`;
+      const phone_number = formData.phoneNumber;
 
       const driverData = {
         name: formData.name,

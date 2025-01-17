@@ -10,6 +10,11 @@ import {
  // verifyingEmailOtp,
   driverLogin,
   updateDriver,
+  getEvents,
+  deleteSharedRide,
+  updateSharedRide,
+  getSharedRides,
+  createSharedRide
   //verifyPhoneOtpForRegistration,
 } from "../controllers/driver.controller";
 import { isAuthenticatedDriver } from "../middleware/isAuthenticated";
@@ -41,5 +46,14 @@ driverRouter.put(
 );
 
 driverRouter.get("/get-rides", isAuthenticatedDriver, getAllRides);
+
+driverRouter.get("/get-events", getEvents);
+
+
+// Define routes for shared rides
+driverRouter.post("/create", createSharedRide);
+driverRouter.get("/get-all", getSharedRides);
+driverRouter.put("/update/:id", updateSharedRide);
+driverRouter.delete("/delete/:id", deleteSharedRide);
 
 export default driverRouter;

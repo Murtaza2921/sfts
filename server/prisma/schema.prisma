@@ -79,5 +79,25 @@ model Event {
   eventDate      DateTime
   eventTime      String
   createdAt      DateTime @default(now())
+  bid            Float
+  noOfDays       Int
+  description     String
 }
 
+model SharedRide {
+  id             Int      @id @default(autoincrement())
+  from           String
+  fromLat        Float
+  fromLng        Float
+  destination    String
+  destinationLat Float
+  destinationLng Float
+  Date           DateTime
+  Time           String
+  createdAt      DateTime @default(now())
+  Bid            Float
+  carType        String
+  numberOfSeats  Int
+  AvaliableSeats Int
+
+}

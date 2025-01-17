@@ -610,3 +610,179 @@ export const updateDriver = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+
+export const getEvents = async (req: Request, res: Response) => {
+  try {
+    // Fetch all events from the database
+    const events = await prisma.event.findMany();
+
+    // Map the events to match the frontend's expected structure
+    const formattedEvents = events.map((event) => ({
+      id: event.id.toString(),
+      title: `Event ${event.id}`,
+      date: event.eventDate.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+      description: event.description,
+      from: { lat: event.fromLat, lng: event.fromLng },
+      destination: { lat: event.destinationLat, lng: event.destinationLng },
+      bid: event.bid,
+    }));
+
+    res.status(200).json(formattedEvents);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+// Create a new shared ride
+export const createSharedRide = async (req: Request, res: Response) => {
+  try {
+    const {
+      from,
+      fromLat,
+      fromLng,
+      destination,
+      destinationLat,
+      destinationLng,
+      date,
+      time,
+      bid,
+      carType,
+      numberOfSeats,
+      availableSeats,
+    } = req.body;
+
+    // Validate required fields
+    if (
+      !from ||
+      !fromLat ||
+      !fromLng ||
+      !destination ||
+      !destinationLat ||
+      !destinationLng ||
+      !date ||
+      !time ||
+      !bid ||
+      !carType ||
+      !numberOfSeats ||
+      !availableSeats
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Create the shared ride in the database
+    const newRide = await prisma.sharedRide.create({
+      data: {
+        from,
+        fromLat,
+        fromLng,
+        destination,
+        destinationLat,
+        destinationLng,
+        Date: new Date(date),
+        Time: time,
+        Bid: parseFloat(bid),
+        carType,
+        numberOfSeats: parseInt(numberOfSeats),
+        AvaliableSeats: parseInt(availableSeats),
+      },
+    });
+
+    res.status(201).json(newRide);
+  } catch (error) {
+    console.error("Error creating shared ride:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Fetch all shared rides
+export const getSharedRides = async (req: Request, res: Response) => {
+  try {
+    const rides = await prisma.sharedRide.findMany();
+    res.status(200).json(rides);
+  } catch (error) {
+    console.error("Error fetching shared rides:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Update a shared ride
+export const updateSharedRide = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const {
+      from,
+      fromLat,
+      fromLng,
+      destination,
+      destinationLat,
+      destinationLng,
+      date,
+      time,
+      bid,
+      carType,
+      numberOfSeats,
+      availableSeats,
+    } = req.body;
+
+    // Validate required fields
+    if (
+      !from ||
+      !fromLat ||
+      !fromLng ||
+      !destination ||
+      !destinationLat ||
+      !destinationLng ||
+      !date ||
+      !time ||
+      !bid ||
+      !carType ||
+      !numberOfSeats ||
+      !availableSeats
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Update the shared ride in the database
+    const updatedRide = await prisma.sharedRide.update({
+      where: { id: parseInt(id) },
+      data: {
+        from,
+        fromLat,
+        fromLng,
+        destination,
+        destinationLat,
+        destinationLng,
+        Date: new Date(date),
+        Time: time,
+        Bid: parseFloat(bid),
+        carType,
+        numberOfSeats: parseInt(numberOfSeats),
+        AvaliableSeats: parseInt(availableSeats),
+      },
+    });
+
+    res.status(200).json(updatedRide);
+  } catch (error) {
+    console.error("Error updating shared ride:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Delete a shared ride
+export const deleteSharedRide = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Delete the shared ride from the database
+    await prisma.sharedRide.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting shared ride:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

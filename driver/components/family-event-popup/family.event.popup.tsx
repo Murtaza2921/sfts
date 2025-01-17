@@ -75,7 +75,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
           <Text style={styles.modalDescription}>{event.description}</Text>
 
           {/* Current Bid */}
-          <Text style={styles.currentBid}>Current Bid: ${event.bid}</Text>
+          <Text style={styles.currentBid}>Current Bid: {event.bid} Pkr</Text>
 
           {/* Map View */}
           <View style={styles.mapContainer}>
@@ -112,7 +112,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
               style={styles.bidInput}
             />
             <Button mode="contained" onPress={handleIncreaseBid} style={styles.bidButton}>
-              Increase Bid
+              your Bid
             </Button>
           </View>
 

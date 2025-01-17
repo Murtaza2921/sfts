@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
 import { Button, TextInput, Title } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { SafeAreaView } from "react-native-safe-area-context";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from "@react-native-picker/picker"; // Import Picker
+import Toast from "react-native-toast-message";
 
 type SharedRide = {
   id: string;
@@ -16,6 +20,13 @@ type SharedRide = {
   availableSeats: string;
 };
 
+// Define the VehicleType enum
+enum VehicleType {
+  Car = "Car",
+  bolan = "bolan",
+  van = "van",
+}
+
 export default function SharedRideForm() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -25,88 +36,147 @@ export default function SharedRideForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [bid, setBid] = useState("");
-  const [carType, setCarType] = useState("");
+  const [carType, setCarType] = useState<VehicleType>(VehicleType.Car); // Use enum for carType
   const [seats, setSeats] = useState("");
   const [availableSeats, setAvailableSeats] = useState("");
   const [fromCoords, setFromCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [fromQuery, setFromQuery] = useState<string>('');
+  const [destinationQuery, setDestinationQuery] = useState<string>('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState(new Date());
 
   useEffect(() => {
     if (id) {
-      const existingRide = {
-        id: "1",
-        from: "New York",
-        destination: "Boston",
-        date: "2023-10-15",
-        time: "10:00 AM",
-        bid: "$20",
-        carType: "Sedan",
-        seats: "4",
-        availableSeats: "2",
+      // Fetch the existing shared ride data from the API
+      const fetchRide = async () => {
+        try {
+          const response = await fetch(`${process.env.EXPO_PUBLIC_SERVER_URI}/driver/get-all`);
+          const rides = await response.json();
+          const ride = rides.find((r: any) => r.id.toString() === id);
+
+          if (ride) {
+            setFrom(ride.from);
+            setDestination(ride.destination);
+            setDate(ride.Date);
+            setTime(ride.Time);
+            setBid(ride.Bid.toString());
+            setCarType(ride.carType as VehicleType); // Cast to VehicleType
+            setSeats(ride.numberOfSeats.toString());
+            setAvailableSeats(ride.AvaliableSeats.toString());
+          }
+        } catch (error) {
+          console.error("Error fetching shared ride:", error);
+        }
       };
-      setFrom(existingRide.from);
-      setDestination(existingRide.destination);
-      setDate(existingRide.date);
-      setTime(existingRide.time);
-      setBid(existingRide.bid);
-      setCarType(existingRide.carType);
-      setSeats(existingRide.seats);
-      setAvailableSeats(existingRide.availableSeats);
+
+      fetchRide();
     }
   }, [id]);
 
-  const handleSave = () => {
-    const newRide: SharedRide = {
-      id: id || String(Math.random()),
+  const handleSave = async () => {
+    const newRide = {
       from,
+      fromLat: fromCoords?.lat || 0,
+      fromLng: fromCoords?.lng || 0,
       destination,
+      destinationLat: destinationCoords?.lat || 0,
+      destinationLng: destinationCoords?.lng || 0,
       date,
       time,
       bid,
       carType,
-      seats,
+      numberOfSeats: seats,
       availableSeats,
     };
-    console.log("Saved ride:", newRide);
-    router.back();
+
+    try {
+      const url = id
+        ? `${process.env.EXPO_PUBLIC_SERVER_URI}/driver/update/${id}`
+        : `${process.env.EXPO_PUBLIC_SERVER_URI}/driver/create`;
+      const method = id ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRide),
+      });
+
+      if (response.ok) {
+       
+        Toast.show({
+          type: "success",
+          text1: id ? "Shared Ride Updated" : "Shared Ride Added",
+          text2: id ? "Your shared ride has been updated successfully." : "Your shared ride has been added successfully.",
+        });
+        router.back();
+      } else {
+        console.error("Failed to save shared ride");
+      }
+    } catch (error) {
+      console.error("Error saving shared ride:", error);
+    }
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const dateString = selectedDate.toISOString().split('T')[0];
+      setDate(dateString);
+    }
+  };
+
+  const handleTimeChange = (event: any, selectedTime?: Date) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const timeString = selectedTime.toTimeString().slice(0, 5);
+      setTime(timeString);
+    }
   };
 
   const renderGooglePlacesInput = (
     placeholder: string,
-    location: string,
+    query: string,
+    setQuery: React.Dispatch<React.SetStateAction<string>>,
     setLocation: React.Dispatch<React.SetStateAction<string>>,
     setCoords: React.Dispatch<React.SetStateAction<{ lat: number; lng: number } | null>>
   ) => (
-    <View style={styles.inputContainer}>
-      <GooglePlacesAutocomplete
-        placeholder={placeholder}
-        onPress={(data, details = null) => {
-          setLocation(data.description);
-          if (details && details.geometry) {
-            setCoords({
-              lat: details.geometry.location.lat,
-              lng: details.geometry.location.lng,
-            });
-          }
-        }}
-        query={{
-          key: `${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`,
-          language: "en",
-        }}
-        fetchDetails
-        styles={{
-          container: { flex: 1 },
-          textInput: styles.input,
-          listView: styles.listView,
-          row: { padding: 10 },
-        }}
-        textInputProps={{
-          value: location,
-          onChangeText: setLocation,
-        }}
-        enablePoweredByContainer={false} // Optional: Hide "Powered by Google"
-      />
-    </View>
+    <GooglePlacesAutocomplete
+      placeholder={placeholder}
+      onPress={(data, details = null) => {
+        setLocation(data.description);
+        if (details && details.geometry) {
+          setCoords({
+            lat: details.geometry.location.lat,
+            lng: details.geometry.location.lng,
+          });
+        }
+      }}
+      query={{
+        key: `${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY!}`,
+        language: 'en',
+      }}
+      fetchDetails
+      styles={{
+        container: { flex: 0, marginBottom: 10 },
+        textInput: {
+          height: 40,
+          color: '#000',
+          fontSize: 16,
+          borderWidth: 1,
+          borderColor: '#ccc',
+          borderRadius: 5,
+          paddingHorizontal: 10,
+        },
+      }}
+      textInputProps={{
+        onChangeText: (text) => setQuery(text),
+        value: query,
+      }}
+      debounce={200}
+    />
   );
 
   const formFields = [
@@ -120,32 +190,36 @@ export default function SharedRideForm() {
     },
     {
       key: "from",
-      component: renderGooglePlacesInput("Where from?", from, setFrom, setFromCoords),
+      component: renderGooglePlacesInput('Where from?', fromQuery, setFromQuery, setFrom, setFromCoords),
     },
     {
       key: "destination",
-      component: renderGooglePlacesInput("Where to?", destination, setDestination, setDestinationCoords),
+      component: renderGooglePlacesInput('Where to?', destinationQuery, setDestinationQuery, setDestination, setDestinationCoords),
     },
     {
       key: "date",
       component: (
-        <TextInput
-          label="Date"
-          value={date}
-          onChangeText={setDate}
-          style={styles.input}
-        />
+        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <TextInput
+            label="Date"
+            value={date}
+            editable={false}
+            style={styles.input}
+          />
+        </TouchableOpacity>
       ),
     },
     {
       key: "time",
       component: (
-        <TextInput
-          label="Time"
-          value={time}
-          onChangeText={setTime}
-          style={styles.input}
-        />
+        <TouchableOpacity onPress={() => setShowTimePicker(true)}>
+          <TextInput
+            label="Time"
+            value={time}
+            editable={false}
+            style={styles.input}
+          />
+        </TouchableOpacity>
       ),
     },
     {
@@ -162,12 +236,17 @@ export default function SharedRideForm() {
     {
       key: "carType",
       component: (
-        <TextInput
-          label="Car Type"
-          value={carType}
-          onChangeText={setCarType}
-          style={styles.input}
-        />
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={carType}
+            onValueChange={(itemValue) => setCarType(itemValue as VehicleType)}
+            style={styles.picker}
+          >
+            {Object.values(VehicleType).map((type) => (
+              <Picker.Item key={type} label={type} value={type} />
+            ))}
+          </Picker>
+        </View>
       ),
     },
     {
@@ -178,6 +257,7 @@ export default function SharedRideForm() {
           value={seats}
           onChangeText={setSeats}
           style={styles.input}
+          keyboardType="numeric"
         />
       ),
     },
@@ -189,6 +269,7 @@ export default function SharedRideForm() {
           value={availableSeats}
           onChangeText={setAvailableSeats}
           style={styles.input}
+          keyboardType="numeric"
         />
       ),
     },
@@ -197,7 +278,7 @@ export default function SharedRideForm() {
       component: (
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={handleSave} style={styles.button}>
-            Save
+            {id ? "Update" : "Save"}
           </Button>
           <Button mode="outlined" onPress={() => router.back()} style={styles.button}>
             Cancel
@@ -208,56 +289,74 @@ export default function SharedRideForm() {
   ];
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <FlatList
-        data={formFields}
-        keyExtractor={(item) => item.key}
-        renderItem={({ item }) => item.component}
-        contentContainerStyle={styles.flatListContent}
-        keyboardShouldPersistTaps="handled"
-      />
-    </KeyboardAvoidingView>
+    <SafeAreaView style={styles.safeAreaContainer} edges={["top"]}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <FlatList
+          data={formFields}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => item.component}
+          contentContainerStyle={styles.flatListContent}
+          keyboardShouldPersistTaps="always" // Fix for keyboard issue
+        />
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        )}
+        {showTimePicker && (
+          <DateTimePicker
+            value={selectedTime}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+          />
+        )}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 16,
-    },
-    flatListContent: {
-      flexGrow: 1,
-    },
-    title: {
-      marginBottom: 20,
-      textAlign: "center",
-    },
-    input: {
-      marginBottom: 16,
-      backgroundColor: "#fff",
-    },
-    inputContainer: {
-      marginBottom: 16,
-      zIndex: 9999, // Ensure this has a high zIndex value
-      elevation: 5, // Ensure it's raised on Android
-    },
-    buttonContainer: {
-      marginTop: 20,
-    },
-    button: {
-      marginTop: 10,
-    },
-    listView: {
-      backgroundColor: "#fff",
-      borderRadius: 5,
-      position: "absolute",
-      top: 50,
-      maxHeight: 200,
-      zIndex: 9999, // Ensure the suggestion list has a higher zIndex
-      elevation: 10, // Ensure the suggestion list is above other content on Android
-    },
-  });
-  
+  safeAreaContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  flatListContent: {
+    flexGrow: 1,
+  },
+  title: {
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    marginBottom: 16,
+    backgroundColor: "#fff",
+  },
+  pickerContainer: {
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    backgroundColor: "#fff",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+  button: {
+    marginTop: 10,
+  },
+});

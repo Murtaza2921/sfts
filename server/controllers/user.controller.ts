@@ -166,11 +166,14 @@ export const addfamilyEvent = async (req: Request, res: Response) => {
     destination, 
     destinationCoords, 
     eventDate, 
-    eventTime 
+    eventTime, 
+    bid, 
+    noOfDays,
+    description
   } = req.body;
 
   try {
-    if (!from || !destination || !eventDate || !eventTime || !fromCoords || !destinationCoords) {
+    if (!from || !destination || !eventDate || !eventTime || !fromCoords || !destinationCoords || !bid || !noOfDays) {
       return res.status(400).send('Missing required fields');
     }
 
@@ -183,7 +186,10 @@ export const addfamilyEvent = async (req: Request, res: Response) => {
         destinationLat: destinationCoords.lat, 
         destinationLng: destinationCoords.lng, 
         eventDate: new Date(eventDate), 
-        eventTime 
+        eventTime,
+        bid: parseFloat(bid), // Ensure bid is a number
+        noOfDays: parseInt(noOfDays, 10), // Ensure noOfDays is a number
+        description
       },
     });
 
@@ -245,6 +251,8 @@ export const editEvent = async (req: Request, res: Response) => {
     destinationLng,
     eventDate,
     eventTime,
+    bid,
+    noOfDays
   } = req.body;
 
   try {
@@ -261,6 +269,8 @@ export const editEvent = async (req: Request, res: Response) => {
         destinationLng,
         eventDate: new Date(eventDate),
         eventTime,
+        bid,
+        noOfDays
       },
     });
     res.status(200).json(updatedEvent); // Return the updated event data
@@ -270,6 +280,16 @@ export const editEvent = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getSharedRides = async (req: Request, res: Response) => {
+  try {
+    const rides = await prisma.sharedRide.findMany();
+    res.status(200).json(rides);
+  } catch (error) {
+    console.error("Error fetching shared rides:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 
 

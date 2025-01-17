@@ -21,7 +21,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
   const [phone_number, setphone_number] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [loading, setloading] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState<string>("+92");
+  const [countryCode, setCountryCode] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const toast = useToast();
   const router = useRouter(); // For navigation
