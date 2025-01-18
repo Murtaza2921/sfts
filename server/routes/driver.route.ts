@@ -23,7 +23,7 @@ const driverRouter = express.Router();
 
 driverRouter.post("/register", register);
 
-driverRouter.post("/login", driverLogin);
+driverRouter.post("/login", driverLoin);
 
 //driverRouter.post("/verify-otp", verifyPhoneOtpForRegistration);
 
@@ -31,11 +31,10 @@ driverRouter.post("/login", driverLogin);
 
 driverRouter.get("/me", isAuthenticatedDriver, getLoggedInDriverData);
 
-driverRouter.put("/me", isAuthenticatedDriver, updateDriver);
-
 driverRouter.get("/get-drivers-data", getDriversById);
 
 driverRouter.put("/update-status", isAuthenticatedDriver, updateDriverStatus);
+driverRouter.post("/save-push-token",isAuthenticatedDriver,savePushToken);
 
 driverRouter.post("/new-ride", isAuthenticatedDriver, newRide);
 

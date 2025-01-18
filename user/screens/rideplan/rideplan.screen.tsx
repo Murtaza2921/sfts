@@ -22,6 +22,7 @@ import { router } from "expo-router";
 import { Clock, LeftArrow, PickLocation, PickUpLocation } from "@/utils/icons";
 import color from "@/themes/app.colors";
 import DownArrow from "@/assets/icons/downArrow";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import PlaceHolder from "@/assets/icons/placeHolder";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import _ from "lodash";
@@ -40,6 +41,7 @@ export default function RidePlanScreen() {
   const { user } = useGetUserData();
   const ws = useRef<any>(null);
   const notificationListener = useRef<any>();
+ 
   const [wsConnected, setWsConnected] = useState(false);
   const [places, setPlaces] = useState<any>([]);
   const [query, setQuery] = useState("");
@@ -52,8 +54,12 @@ export default function RidePlanScreen() {
   const [marker, setMarker] = useState<any>(null);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const [distance, setDistance] = useState<any>(null);
+  
   const [locationSelected, setlocationSelected] = useState(false);
+  const [pushTokenRef, setpushTokenRef] = useState("");
+  const [isBookingConfirmed, setIsBookingConfirmed] = useState<boolean>(false);
   const [selectedVehcile, setselectedVehcile] = useState("Car");
+  const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
   const [travelTimes, setTravelTimes] = useState({
     driving: null,
     walking: null,
@@ -61,8 +67,7 @@ export default function RidePlanScreen() {
     transit: null,
   });
   const [keyboardAvoidingHeight, setkeyboardAvoidingHeight] = useState(false);
-  const [driverLists, setdriverLists] = useState([]);
-  const [selectedDriver, setselectedDriver] = useState<DriverType>();
+  const [driverLists, setdriverLists] = useState([]);;
   const [driverLoader, setdriverLoader] = useState(true);
 
   Notifications.setNotificationHandler({
@@ -123,7 +128,7 @@ export default function RidePlanScreen() {
   }, []);
 
   const initializeWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.10.9:8080");
+    ws.current = new WebSocket("ws://192.168.116.148:8080");
     ws.current.onopen = () => {
       console.log("Connected to websocket server");
       setWsConnected(true);
@@ -156,6 +161,25 @@ export default function RidePlanScreen() {
     registerForPushNotificationsAsync();
   }, []);
 
+  const savePushTokenToDatabase = async (pushToken: string) => {
+    console.log("Saving Push notifications")
+    const accessToken = await AsyncStorage.getItem("accessToken");
+    try {
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_SERVER_URI}/save-push-token-user`,
+        { pushToken },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log("Push token saved to the database successfully:", response.data);
+    } catch (error) {
+      console.error("Failed to save push token to the database:", error);
+    }
+  };
+
   async function registerForPushNotificationsAsync() {
     if (Device.isDevice) {
       const { status: existingStatus } =
@@ -186,6 +210,7 @@ export default function RidePlanScreen() {
             projectId,
           })
         ).data;
+        await savePushTokenToDatabase(pushTokenString);
         console.log(pushTokenString);
         // return pushTokenString;
       } catch (e: unknown) {
@@ -369,11 +394,12 @@ export default function RidePlanScreen() {
     const response = await axios.get(
       `${process.env.EXPO_PUBLIC_SERVER_URI}/driver/get-drivers-data`,
       {
-        params: { ids: "1" },
+        params: { ids: driverIds },
       }
     );
     console.log("step 6");
     const driverData = response.data;
+    console.log("Driver Data retreive",driverData);
     setdriverLists(driverData);
     setdriverLoader(false);
     console.log("step 7");
@@ -420,30 +446,47 @@ export default function RidePlanScreen() {
   
 
   const handleOrder = async () => {
-    console.log("step 8");
-    const currentLocationName = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLocation?.latitude},${currentLocation?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
-    );
-    const destinationLocationName = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker?.latitude},${marker?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
-    );
-    console.log("step 9");
-    const data = {
-      user,
-      currentLocation,
-      marker,
-      distance: distance.toFixed(2),
-      currentLocationName:
-        currentLocationName.data.results[0].formatted_address,
-      destinationLocation:
-        destinationLocationName.data.results[0].formatted_address,
-    };
-    console.log("step 10 : ", data);
-    const driverPushToken = "ExponentPushToken[ZCHrTtH1HZfOvmk62vrD-Y]";
-    //ExponentPushToken[47XbPbGpyW6XRt_2A_rqQd]
-    console.log("step 11");
-    
-    await sendPushNotification(driverPushToken, JSON.stringify(data));
+    if (!selectedDriverId) return;
+  
+    setIsBookingConfirmed(true); // Disable button
+  
+    try {
+      console.log("step 8");
+  
+      const currentLocationName = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLocation?.latitude},${currentLocation?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
+      );
+  
+      const destinationLocationName = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker?.latitude},${marker?.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_CLOUD_API_KEY}`
+      );
+  
+      console.log("step 9");
+  
+      const data = {
+        user,
+        currentLocation,
+        marker,
+        distance: distance.toFixed(2),
+        currentLocationName: currentLocationName.data.results[0].formatted_address,
+        destinationLocation: destinationLocationName.data.results[0].formatted_address,
+      };
+  
+      console.log("step 10 : ", data);
+  
+      if (pushTokenRef) {
+        console.log("step 11");
+        await sendPushNotification(pushTokenRef, JSON.stringify(data));
+        alert("Booking request sent successfully!");
+      } else {
+        console.error("Push token is not available");
+        alert("Driver push token is missing. Please select another driver.");
+      }
+    } catch (error) {
+      console.error("Error during booking process:", error);
+      alert("Failed to complete booking. Please try again.");
+      setIsBookingConfirmed(false); // Re-enable button on error
+    }
   };
 
   return (
@@ -518,79 +561,82 @@ export default function RidePlanScreen() {
                     </Text>
                   </View>
                   <View style={{ padding: windowWidth(10) }}>
-                    {driverLists?.map((driver: DriverType) => (
-                      <Pressable
-                        style={{
-                          width: windowWidth(420),
-                          borderWidth:
-                            selectedVehcile === driver.vehicle_type ? 2 : 0,
-                          borderRadius: 10,
-                          padding: 10,
-                          marginVertical: 5,
-                        }}
-                        onPress={() => {
-                          setselectedVehcile(driver.vehicle_type);
-                        }}
-                      >
-                        <View style={{ margin: "auto" }}>
-                          <Image
-                            source={
-                              driver?.vehicle_type === "Car"
-                                ? require("@/assets/images/vehicles/car.png")
-                                : driver?.vehicle_type === "Motorcycle"
-                                ? require("@/assets/images/vehicles/bike.png")
-                                : require("@/assets/images/vehicles/bike.png")
-                            }
-                            style={{ width: 90, height: 80 }}
-                          />
-                        </View>
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <View>
-                            <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                              RideWave {driver?.vehicle_type}
-                            </Text>
-                            <Text style={{ fontSize: 16 }}>
-                              {getEstimatedArrivalTime(travelTimes.driving)}{" "}
-                              dropoff
-                            </Text>
-                          </View>
-                          <Text
-                            style={{
-                              fontSize: windowWidth(20),
-                              fontWeight: "600",
-                            }}
-                          >
-                            BDT{" "}
-                            {(
-                              distance.toFixed(2) * parseInt(driver.rate)
-                            ).toFixed(2)}
-                          </Text>
-                        </View>
-                      </Pressable>
-                    ))}
+                 
+                  {driverLists?.map((driver: DriverType) => (
+  <Pressable
+    key={String(driver.id)}
+    style={{
+      width: windowWidth(420),
+      borderWidth: selectedDriverId === String(driver.id) ? 2 : 1,  // Thin border for all items
+      borderColor: "#ccc",  // Light grey color for border
+      borderRadius: 10,
+      padding: 10,
+      marginVertical: 8,  // Slightly increased spacing for better separation
+      backgroundColor: selectedDriverId === String(driver.id) ? "#e0f7fa" : "white",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 3,  // Elevation for Android shadow effect
+    }}
+    onPress={() => {
+      setSelectedDriverId(String(driver.id));
+      setpushTokenRef(driver.notificationToken);
+    }}
+  >
+    <View style={{ alignItems: "center" }}>
+      <Image
+        source={
+          driver?.vehicle_type === "Car"
+            ? require("@/assets/images/vehicles/car.png")
+            : driver?.vehicle_type === "Motorcycle"
+            ? require("@/assets/images/vehicles/bike.png")
+            : require("@/assets/images/vehicles/bike.png")
+        }
+        style={{ width: 90, height: 80 }}
+      />
+    </View>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 5,
+      }}
+    >
+      <View>
+        <Text style={{ fontSize: 20, fontWeight: "600" }}>
+          SFTS {driver?.vehicle_type}
+        </Text>
+        <Text style={{ fontSize: 16 }}>
+          {getEstimatedArrivalTime(travelTimes.driving)} dropoff
+        </Text>
+      </View>
+      <Text style={{ fontSize: windowWidth(20), fontWeight: "600" }}>
+        PKR {(distance.toFixed(2) * parseInt(driver.rate)).toFixed(2)}
+      </Text>
+    </View>
+  </Pressable>
+))}
 
-                    <View
-                      style={{
-                        paddingHorizontal: windowWidth(10),
-                        marginTop: windowHeight(15),
-                      }}
-                    >
-                      <Button
-                        backgroundColor={"#000"}
-                        textColor="#fff"
-                        title={`Confirm Booking`}
-                        onPress={() => handleOrder()}
-                      />
-                    </View>
+
+<View
+  style={{
+    paddingHorizontal: windowWidth(10),
+    marginTop: windowHeight(15),
+  }}
+>
+  <Button
+    backgroundColor={selectedDriverId && !isBookingConfirmed ? "#000" : "#d3d3d3"} // Change button color
+    textColor={selectedDriverId && !isBookingConfirmed ? "#fff" : "#808080"}
+    title={isBookingConfirmed ? "Request Sent" : "Confirm Booking"}
+    onPress={handleOrder}
+    disabled={!selectedDriverId || isBookingConfirmed} // Disable button if no driver selected or booking confirmed
+  />
+</View>
                   </View>
                 </ScrollView>
-              )}
+              )}  
             </>
           ) : (
             <>

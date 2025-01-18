@@ -5,6 +5,8 @@ import prisma from "../utils/prisma";
 import jwt from "jsonwebtoken";
 import { sendToken } from "../utils/send-token";
 import { nylas } from "../app";
+import { Prisma } from '@prisma/client';
+
 const bcrypt = require('bcrypt');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -289,19 +291,22 @@ export const updateDriverStatus = async (req: any, res: Response) => {
 // get drivers data with id
 export const getDriversById = async (req: Request, res: Response) => {
   try {
-    const { ids } = req.query as any;
-    console.log(ids,'ids')
+    // Ensure `ids` is properly typed as a string from `req.query`
+    const { ids } = req.query as { ids?: string };
+
+    console.log(ids, "ids");
+    
     if (!ids) {
       return res.status(400).json({ message: "No driver IDs provided" });
     }
 
-    const driverIds = ids.split(",");
+    // Convert the comma-separated `ids` string to an array of integers
+    const driverIds = ids.split(",").map(id => parseInt(id, 10));
 
-    // Fetch drivers from database
+    // Fetch drivers from the database
     const drivers = await prisma.driver.findMany({
       where: {
-        id: 1,
-        // id: { in: driverIds },
+        id: { in: driverIds }, // Use the `in` operator for the query
       },
     });
 
@@ -312,6 +317,35 @@ export const getDriversById = async (req: Request, res: Response) => {
   }
 };
 
+export const savePushToken = async (req: any, res: Response) => {
+  const { pushToken } = req.body;
+  const driverId = req.driverId; // Assuming driver ID is extracted from the JWT or session middleware
+  console.log("Driver ID",driverId)
+  if (!pushToken) {
+    return res.status(400).json({ error: 'Push token is required' });
+  }
+
+  try {
+    // Update or create the push token for the driver
+    await prisma.driver.update({
+      where: { id: driverId },
+      data: { notificationToken:pushToken },
+    });
+
+    return res.status(200).json({ message: 'Push token saved successfully' });
+  } catch (error) {
+    console.error('Error saving push token:', error);
+ // Narrow the error type
+ if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  if (error.code === 'P2025') {
+    return res.status(404).json({ error: 'Driver not found' });
+  }
+}
+
+console.error('Error saving push token:', error);
+return res.status(500).json({ error: 'Failed to save push token' });
+}
+};
 // creating new ride
 export const newRide = async (req: any, res: Response) => {
   try {
@@ -431,7 +465,7 @@ export const getAllRides = async (req: any, res: Response) => {
   });
 };
 
-export const driverLogin = async (
+export const driverLoin = async (
   req: Request,
   res: Response,
  

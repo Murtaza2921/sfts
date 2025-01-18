@@ -28,6 +28,7 @@ userRouter.put("/editEvent/:id", editEvent);
 
 
 userRouter.get("/me", isAuthenticated, getLoggedInUserData);
+userRouter.post("/save-push-token-user", isAuthenticated, saveUserToken);
 //,
 userRouter.get("/get-rides", isAuthenticated, getAllRides);
 

@@ -1,10 +1,11 @@
-import { View, Text, Linking } from "react-native";
+import { View, Text, Linking, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
 import MapView, { Marker } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import color from "@/themes/app.colors";
+import { StyleSheet } from 'react-native';
 
 export default function RideDetailsScreen() {
   const { orderData: orderDataObj } = useLocalSearchParams() as any;
@@ -119,7 +120,7 @@ export default function RideDetailsScreen() {
           {(
             orderData.driver?.distance * parseInt(orderData?.driver?.rate)
           ).toFixed(2)}{" "}
-          BDT
+          PKR
         </Text>
         <Text
           style={{
@@ -130,7 +131,51 @@ export default function RideDetailsScreen() {
         >
           **Pay to your driver after reaching to your destination!
         </Text>
+        <Pressable
+        style={styles.chatButton}
+        onPress={() => {
+          router.push({
+            pathname: "/(routes)/ride-details",
+            params: { orderData: JSON.stringify(orderData) },
+          });;// Navigate to Chat screen
+        }}
+        >
+          <Text style={styles.chatButtonText}>Chat with your Captain</Text>
+        </Pressable>
       </View>
     </View>
   );
 }
+
+
+const styles = StyleSheet.create({
+  infoText: {
+    fontSize: fontSizes.FONT20,
+    fontWeight: "500",
+    paddingVertical: windowHeight(5),
+  },
+  linkText: {
+    color: color.buttonBg,
+    paddingLeft: 5,
+    fontSize: fontSizes.FONT20,
+    fontWeight: "500",
+    paddingVertical: windowHeight(5),
+  },
+  noteText: {
+    fontSize: fontSizes.FONT14,
+    fontWeight: "400",
+    paddingVertical: windowHeight(5),
+  },
+  chatButton: {
+    backgroundColor: color.buttonBg,
+    padding: windowHeight(10),
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: windowHeight(15),
+  },
+  chatButtonText: {
+    color: "white",
+    fontSize: fontSizes.FONT16,
+    fontWeight: "600",
+  },
+});

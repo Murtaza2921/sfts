@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Ridewave-Driver",
-    "slug": "Ridewave-Driver",
+    "name": "Sfts Save Ride",
+    "slug": "sfts-ride-booking",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,7 +35,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/TT-Octosquares-Medium.ttf"]
+          "fonts": [
+            "./assets/fonts/TT-Octosquares-Medium.ttf"
+          ]
         }
       ]
     ],
@@ -44,8 +46,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "53c925dc-2b8b-40f7-b557-c3080130c563"
+        "projectId": "0beffdfa-0d1a-43ba-aef1-b4758f72b103"
       }
-    }
+    },
+    "owner": "attauljalil"
   }
 }
