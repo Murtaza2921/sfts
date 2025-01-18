@@ -135,9 +135,12 @@ export default function RideDetailsScreen() {
         style={styles.chatButton}
         onPress={() => {
           router.push({
-            pathname: "/(routes)/ride-details",
-            params: { orderData: JSON.stringify(orderData) },
-          });;// Navigate to Chat screen
+            pathname: "/(routes)/user-chat",
+            params: {
+              UserId: orderData.userId,
+              driverId: orderData.driver?.id,
+            },
+          });// Navigate to Chat screen
         }}
         >
           <Text style={styles.chatButtonText}>Chat with your Captain</Text>
