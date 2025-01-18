@@ -8,13 +8,14 @@ import {
   updateDriverStatus,
   updatingRideStatus,
  // verifyingEmailOtp,
-  driverLogin,
+  driverLoin,
   updateDriver,
   getEvents,
   deleteSharedRide,
   updateSharedRide,
   getSharedRides,
-  createSharedRide
+  createSharedRide,
+  savePushToken
   //verifyPhoneOtpForRegistration,
 } from "../controllers/driver.controller";
 import { isAuthenticatedDriver } from "../middleware/isAuthenticated";
