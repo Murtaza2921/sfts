@@ -79,6 +79,7 @@ export default function RidePlanScreen() {
   });
 
   useEffect(() => {
+    console.log("current user Id",user?.id)
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         const orderData = {
@@ -86,6 +87,7 @@ export default function RidePlanScreen() {
           marker: notification.request.content.data.marker,
           distance: notification.request.content.data.distance,
           driver: notification.request.content.data.orderData,
+          userId:1,
         };
         router.push({
           pathname: "/(routes)/ride-details",
