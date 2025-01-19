@@ -6,3 +6,4 @@ export const generateRoomId = (userId: string, driverId: string): string => {
     // Combine userId and driverId in a consistent order
     return [userId, driverId].sort().join("_");
   };
+  
