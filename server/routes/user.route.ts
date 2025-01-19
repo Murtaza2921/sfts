@@ -10,6 +10,9 @@ import {
   editEvent,
   getSharedRides,
   saveUserToken,
+  forgotPassword,
+  sendSms,
+  resetPassword
 } from "../controllers/user.controller";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 
