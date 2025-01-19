@@ -20,7 +20,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 
 app.use(cors({
-  origin: "http://192.168.100.132:8081", // Expo Go URL, adjust if necessary
+  origin: "http://192.168.1.17:8081", // Expo Go URL, adjust if necessary
   methods: ["GET", "POST"],
 }));
 // routes
