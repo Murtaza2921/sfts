@@ -166,13 +166,16 @@ export default function RideDetailsScreen() {
           **Pay to your driver after reaching to your destination!
         </Text>
         <Pressable
-          style={styles.chatButton}
-          onPress={() => {
-            router.push({
-              pathname: "/(routes)/ride-details",
-              params: { orderData: JSON.stringify(orderData) },
-            });
-          }}
+        style={styles.chatButton}
+        onPress={() => {
+          router.push({
+            pathname: "/(routes)/user-chat",
+            params: {
+              UserId: orderData.userId,
+              driverId: orderData.driver?.id,
+            },
+          });// Navigate to Chat screen
+        }}
         >
           <Text style={styles.chatButtonText}>Chat with your Captain</Text>
         </Pressable>

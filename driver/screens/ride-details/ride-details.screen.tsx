@@ -1,4 +1,4 @@
-import { View, Text, Linking } from "react-native";
+import { View, Text, Linking, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
@@ -77,7 +77,7 @@ export default function RideDetailsScreen() {
   };
 
   return (
-    <View>
+    <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={{ height: windowHeight(480) }}>
         <MapView
           style={{ flex: 1 }}
@@ -159,7 +159,29 @@ export default function RideDetailsScreen() {
             onPress={() => handleSubmit()}
           />
         </View>
+
+        {/* Chat Button */}
+        <View style={{ paddingTop: windowHeight(20) }}>
+          <Button
+            title="Chat with User"
+            height={windowHeight(40)}
+            backgroundColor={color.buttonBg}
+            
+            onPress={() =>
+              
+          
+              router.push({
+                
+                pathname: "/(routes)/chat",
+                params: {
+                  userId: orderData?.user?.id,
+                  driverId: orderData?.driver?.id,
+                },
+              })
+            }
+          />
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
