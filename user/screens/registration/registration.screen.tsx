@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import React, { useState } from "react";
 import { useTheme } from "@react-navigation/native";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
@@ -14,13 +14,12 @@ import { useToast } from "react-native-toast-notifications";
 export default function RegistrationScreen() {
   const toast = useToast();
   const { colors } = useTheme();
-  const [emailFormatWarning, setEmailFormatWarning] = useState("");
   const [showWarning, setShowWarning] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    phoneNumber: "",  // You can fetch this from a previous screen or capture as input.
+    phoneNumber: "",
     email: "",
-    password: "", // Add password field here
+    password: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -29,15 +28,54 @@ export default function RegistrationScreen() {
       ...prevData,
       [key]: value,
     }));
+    
+    // Reset warnings when user starts typing
+    if (key === "phoneNumber") {
+      setShowWarning(false);
+    }
   };
 
-  
+  const validatePhoneNumber = (phoneNumber: string) => {
+    // Remove any non-digit characters
+    const cleanedNumber = phoneNumber.replace(/\D/g, "");
+
+    // Check if the cleaned number starts with '3' and has exactly 10 digits
+    return cleanedNumber.length === 10 && cleanedNumber.startsWith("3");
+  };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.email || !formData.phoneNumber || !formData.password) {
+    if (!formData.name || !formData.phoneNumber || !formData.email || !formData.password ) {
       setShowWarning(true);
+      Alert.alert("Validation Error", "All fields are required.");
       return; // Stop if fields are empty
     }
+
+    // Validate phone number
+    if (!validatePhoneNumber(formData.phoneNumber)) {
+      toast.show("Contact number must start with '3' and have exactly 10 digits.", {
+        type: "danger",
+        placement: "bottom",
+      });
+      return;
+    }
+
+    // Validate email (example for Gmail)
+    const emailRegex = /^[^\s@]+@gmail\.com$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert("Validation Error", "Please enter a valid Gmail address.");
+      return;
+    }
+
+    // Strong password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      Alert.alert(
+        "Validation Error",
+        "Password must be at least 8 characters long with at least one uppercase letter, one lowercase letter, one number, and one special character."
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {

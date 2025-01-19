@@ -30,9 +30,13 @@ userRouter.put("/editEvent/:id", editEvent);
 
 userRouter.get("/me", isAuthenticated, getLoggedInUserData);
 userRouter.post("/save-push-token-user", isAuthenticated, saveUserToken);
-//,
+
 userRouter.get("/get-rides", isAuthenticated, getAllRides);
 
-userRouter.get('/shared-rides', getSharedRides);
+
+userRouter.post("/forget-password", forgotPassword)
+userRouter.post("/sendSms", sendSms)
+userRouter.post("/resetPassword", resetPassword)
+
 
 export default userRouter;

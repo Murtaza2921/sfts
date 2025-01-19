@@ -15,7 +15,7 @@ import axios from "axios";
 export default function LoginScreen() {
   const [phone_number, setphone_number] = useState("");
   const [loading, setloading] = useState(false);
-  const [countryCode, setCountryCode] = useState("+92");
+  const [countryCode, setCountryCode] = useState("");
   const toast = useToast();
 
   const handleSubmit = async () => {
@@ -70,8 +70,9 @@ export default function LoginScreen() {
                   phone_number={phone_number}
                   setphone_number={setphone_number}
                   countryCode={countryCode}
-                  setCountryCode={setCountryCode}
-                />
+                  setCountryCode={setCountryCode} email={""} setEmail={function (email: string): void {
+                    throw new Error("Function not implemented.");
+                  } }                />
                 <View style={[external.mt_25, external.Pb_15]}>
                   <Button
                     title="Get Otp"
