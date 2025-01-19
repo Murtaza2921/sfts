@@ -27,6 +27,7 @@ const driverRouter = express.Router();
 
 driverRouter.post("/register", register);
 
+
 driverRouter.post("/login", driverLoin);
 
 //driverRouter.post("/verify-otp", verifyPhoneOtpForRegistration);
