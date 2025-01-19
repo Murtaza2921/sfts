@@ -23,7 +23,7 @@ const ChatScreen: React.FC = () => {
   const flatListRef = useRef<FlatList<any>>(null);
   useEffect(() => {
     // Connect to WebSocket server
-    ws.current = new WebSocket('ws://192.168.116.148:8080');
+    ws.current = new WebSocket('ws://192.168.1.103:8080');
     ws.current.onopen = () => {
       console.log('Connected to WebSocket');
       ws.current?.send(JSON.stringify({ 

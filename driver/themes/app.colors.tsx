@@ -1,5 +1,6 @@
 export type Color = {
   lightGray: string;
+  inactive: any;
   regularText: string;
   primaryText: string;
   linearBorder: string;

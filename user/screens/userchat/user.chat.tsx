@@ -23,7 +23,7 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     // Initialize WebSocket connection
-    ws.current = new WebSocket('ws://192.168.116.148:8080');
+    ws.current = new WebSocket('ws://192.168.1.103:8080');
     const userId = '1';
     ws.current.onopen = () => {
       console.log('Connected to WebSocket');

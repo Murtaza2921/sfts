@@ -187,7 +187,112 @@ export const loginUser = async (
   }
 };
 
+const verificationCodes: { [key: string]: string } = {};
+import * as querystring from 'querystring';
+import * as http from 'http';
 
+export const forgotPassword = async (req: Request, res: Response): Promise<Response> => {
+  const { contact }: { contact: string } = req.body;
+const phone_number = contact
+  try {
+    const user = await prisma.user.findUnique({
+      where: { phone_number },
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    verificationCodes[phone_number] = verificationCode;
+
+    return res.json({ success: true, verificationCode });
+  } catch (err) {
+    console.error("Error finding user:", err);
+    return res.status(500).json({ success: false, message: 'Error processing request' });
+  }
+};
+
+// Send SMS Endpoint
+export const sendSms = (req: Request, res: Response): void => {
+  let { recipient, message }: { recipient: string, message: string } = req.body;
+
+  // Ensure recipient number starts with '92' (Pakistan country code)
+  if (!recipient.startsWith('92')) {
+      recipient = `92${recipient.replace(/^0+/, '')}`;
+  }
+
+  const params = querystring.stringify({
+      id: 'rchgulbergisb',
+      pass: 'window2008',
+      msg: message,
+      to: recipient,
+      mask: 'IBECHS',
+      type: 'xml',
+      lang: 'English',
+  });
+
+  const options = {
+      hostname: 'www.outreach.pk',
+      path: '/api/sendsms.php/sendsms/url',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(params),
+      },
+  };
+
+  const smsReq = http.request(options, (smsRes) => {
+      let responseData = '';
+
+      smsRes.on('data', (chunk) => {
+          responseData += chunk;
+      });
+
+      smsRes.on('end', () => {
+          console.log("SMS Gateway Response:", responseData);
+          return res.json({ success: true, message: 'SMS sent successfully', gatewayResponse: responseData });
+      });
+  });
+
+  smsReq.on('error', (e) => {
+      console.error("Error sending SMS:", e);
+      return res.status(500).json({ success: false, message: 'Failed to send SMS', error: e.message });
+  });
+
+  smsReq.write(params);
+  smsReq.end();
+};
+
+// Reset Password Endpoint
+export const resetPassword = async (req: Request, res: Response): Promise<Response> => {
+  const { contact, newPassword, otp }: { contact: string, newPassword: string, otp: string } = req.body;
+const phone_number = contact;
+const password = newPassword;
+const verificationCode = otp;
+
+
+  if (!verificationCodes[phone_number] || verificationCodes[phone_number] !== verificationCode) {
+      return res.status(400).json({ success: false, message: 'Invalid verification code' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedUser = await prisma.user.update({
+      where: { phone_number },
+      data: { password: hashedPassword },
+    });
+
+    // Delete the verification code after successful password reset
+    delete verificationCodes[phone_number];
+    
+    return res.json({ success: true, message: 'Password reset successfully' });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    return res.status(500).json({ success: false, message: 'Error processing password reset' });
+  }
+};
 
 export const addfamilyEvent = async (req: Request, res: Response) => {
   const { 

@@ -15,7 +15,10 @@ import {
   updateSharedRide,
   getSharedRides,
   createSharedRide,
-  savePushToken
+  savePushToken,
+  forgotPassword,
+  resetPassword,
+  sendSms,
   //verifyPhoneOtpForRegistration,
 } from "../controllers/driver.controller";
 import { isAuthenticatedDriver } from "../middleware/isAuthenticated";
@@ -38,7 +41,9 @@ driverRouter.put("/update-status", isAuthenticatedDriver, updateDriverStatus);
 driverRouter.post("/save-push-token",isAuthenticatedDriver,savePushToken);
 
 driverRouter.post("/new-ride", isAuthenticatedDriver, newRide);
-
+driverRouter.post("/forget-password", forgotPassword)
+driverRouter.post("/sendSms", sendSms)
+driverRouter.post("/resetPassword", resetPassword)
 driverRouter.put(
   "/update-ride-status",
   isAuthenticatedDriver,
