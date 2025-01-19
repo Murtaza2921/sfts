@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from "expo-router";
 import { generateRoomId } from '@/utils/contants'; 
-
 const ChatScreen: React.FC = () => {
   const { userId, driverId } = useLocalSearchParams();
   console.log("User Id and Driver Id ", userId, driverId);
@@ -22,13 +21,10 @@ const ChatScreen: React.FC = () => {
   const [text, setText] = useState("");
   const ws = useRef<WebSocket | null>(null);
   const flatListRef = useRef<FlatList<any>>(null);
-
   useEffect(() => {
     // Connect to WebSocket server
     ws.current = new WebSocket('ws://192.168.116.148:8080');
-
     ws.current.onopen = () => {
-      const roomId = '1'
       console.log('Connected to WebSocket');
       ws.current?.send(JSON.stringify({ 
         type: 'joinRoom',
@@ -38,11 +34,9 @@ const ChatScreen: React.FC = () => {
         driverId 
       }));
     };
-
     ws.current.onmessage = (event) => {
       const incomingMessage = JSON.parse(event.data);
       console.log("Incoming Message:", incomingMessage);
-
       if (incomingMessage.type === 'newMessage' && incomingMessage.roomId === roomId) {
         const transformedMessage = {
           ...incomingMessage,
@@ -53,20 +47,16 @@ const ChatScreen: React.FC = () => {
         setMessages((prev) => [...prev, transformedMessage]);
       }
     };
-
     ws.current.onerror = (error) => {
       console.error('WebSocket Error: ', error);
     };
-
     ws.current.onclose = () => {
       console.log('WebSocket connection closed');
     };
-
     return () => {
       ws.current?.close();
     };
   }, [roomId, userId, driverId]);
-
   const sendMessage = () => {
     if (text.trim()) {
       const message = {
@@ -86,7 +76,6 @@ const ChatScreen: React.FC = () => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }
   };
-
   const renderMessage = ({ item }: { item: any }) => (
     <View
       style={[
@@ -100,14 +89,12 @@ const ChatScreen: React.FC = () => {
       </Text>
     </View>
   );
-
   useEffect(() => {
     // Scroll to the bottom when new messages arrive
     if (messages.length > 0) {
       flatListRef.current?.scrollToEnd({ animated: true });
     }
   }, [messages]);
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -136,7 +123,6 @@ const ChatScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f8f8' },
   messagesList: { padding: 10, flexGrow: 1, justifyContent: 'flex-end' },
@@ -183,5 +169,4 @@ const styles = StyleSheet.create({
   },
   sendButtonText: { color: '#fff', fontSize: 16 },
 });
-
 export default ChatScreen;
